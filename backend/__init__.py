@@ -144,12 +144,15 @@ def create_app(db_path=None):
     @app.post("/api/sessions")
     def start_session():
         db = get_db()
+        # overlapping a stopped Sleep Session (e.g. a live Simulator run that stopped at a future ended_at) is accepted; only one may be running
         if running(db):
             abort(409, "a Sleep Session is already running")
         b = body()
         started_at = parse_ts(b["started_at"]) if "started_at" in b else now()
         if started_at is None:
             abort(400, "started_at must be an ISO 8601 timestamp with a timezone")
+        if started_at > (datetime.now(timezone.utc) + timedelta(minutes=5)).strftime(FMT):
+            abort(400, "started_at is more than 5 minutes in the future")
         cur = db.execute("INSERT INTO sessions (started_at) VALUES (?)", (started_at,))
         return session_json(find_session(db, cur.lastrowid)), 201
 
@@ -177,9 +180,14 @@ def create_app(db_path=None):
         s = running(db)
         if s is None:
             abort(409, "no Sleep Session is running")
+        # auto-close horizon
+        horizon = (datetime.strptime(s["started_at"], FMT) + timedelta(hours=14)).strftime(FMT)
         rows, rejected = [], []
         for i, r in enumerate(batch):
             reason = check_reading(r)
+            # no cap at "now": the Simulator replays on its own clock
+            if not reason and not s["started_at"] <= parse_ts(r["recorded_at"]) <= horizon:
+                reason = "outside session"
             if reason:
                 rejected.append({"index": i, "reason": reason})
             else:
@@ -217,7 +225,7 @@ def create_app(db_path=None):
             args.append(request.args["sensor"])
         rows = db.execute(query + " ORDER BY recorded_at", args)
         return [
-            {"sensor": r["sensor"], "value": r["value"], "recorded_at": r["recorded_at"], "simulated": bool(r["simulated"])}
+            {"sensor": r["sensor"], "value": int(r["value"]) if r["sensor"] == "motion" else r["value"], "recorded_at": r["recorded_at"], "simulated": bool(r["simulated"])}
             for r in rows
         ]
 

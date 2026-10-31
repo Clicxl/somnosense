@@ -62,3 +62,11 @@ def test_readings_filter_by_sensor(client):
     client.post("/api/readings", json=[reading(), reading(sensor="motion", value=2)])
     r = client.get("/api/sessions/1/readings?sensor=motion").json
     assert [x["sensor"] for x in r] == ["motion"]
+
+
+def test_motion_readings_returned_as_int(client):
+    night(client, "2025-10-31T23:00:00Z")
+    client.post("/api/readings", json=[reading(sensor="motion", value=3)])
+    r = client.get("/api/sessions/1/readings?sensor=motion").json
+    assert r == [{"sensor": "motion", "value": 3, "recorded_at": "2025-10-31T23:00:30Z", "simulated": True}]
+    assert type(r[0]["value"]) is int  # 3.0 == 3

@@ -86,3 +86,18 @@ def test_can_start_after_stop(client):
     start(client)
     client.post("/api/sessions/1/stop")
     assert start(client).status_code == 201
+
+
+def test_start_more_than_5_min_in_future_returns_400(client, db_path):
+    from datetime import datetime, timedelta, timezone
+
+    r = start(client, started_at=(datetime.now(timezone.utc) + timedelta(minutes=6)).isoformat())
+    assert r.status_code == 400
+    assert "error" in r.json
+    assert sql(db_path, "SELECT COUNT(*) FROM sessions") == [(0,)]
+
+
+def test_start_within_5_min_tolerance_returns_201(client):
+    from datetime import datetime, timedelta, timezone
+
+    assert start(client, started_at=(datetime.now(timezone.utc) + timedelta(minutes=4)).isoformat()).status_code == 201

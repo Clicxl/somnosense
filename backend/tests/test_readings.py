@@ -87,3 +87,29 @@ def test_malformed_readings_rejected_without_failing_batch(client, running, db_p
         {"index": 5, "reason": "bad timestamp"},
     ]}
     assert sql(db_path, "SELECT COUNT(*) FROM readings") == [(2,)]
+
+
+def test_reading_outside_session_rejected(client, db_path, running):
+    r = post(client, [
+        reading(recorded_at="2025-10-31T22:59:59Z"),
+        reading(recorded_at="2025-10-31T23:00:00Z"),
+        reading(recorded_at="2025-11-01T13:00:00Z"),
+        reading(recorded_at="2025-11-01T13:00:01Z"),
+        reading(recorded_at="2025-11-01T04:29:59+05:30"),  # 22:59:59Z
+    ])
+    assert r.status_code == 201
+    assert r.json == {"accepted": 2, "rejected": [
+        {"index": 0, "reason": "outside session"},
+        {"index": 3, "reason": "outside session"},
+        {"index": 4, "reason": "outside session"},
+    ]}
+    assert sql(db_path, "SELECT COUNT(*) FROM readings") == [(2,)]
+
+
+def test_reading_after_now_accepted_inside_session(client):
+    # the Simulator replays a night on its own clock, so Readings may be dated after now
+    from datetime import datetime, timedelta, timezone
+
+    client.post("/api/sessions")
+    later = (datetime.now(timezone.utc) + timedelta(hours=8)).isoformat()
+    assert post(client, [reading(recorded_at=later)]).json["accepted"] == 1

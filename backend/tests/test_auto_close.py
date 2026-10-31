@@ -44,3 +44,12 @@ def test_readings_to_stale_session_return_409(client, db_path):
     client.post("/api/sessions", json={"started_at": "2025-10-31T23:00:00Z"})
     sql(db_path, AGE, "-15 hours")
     assert client.post("/api/readings", json=[reading()]).status_code == 409
+
+
+def test_auto_closed_session_never_ends_before_started_at(client, db_path):
+    client.post("/api/sessions", json={"started_at": "2025-10-31T23:00:00Z"})
+    client.post("/api/readings", json=[reading(recorded_at="2025-10-31T22:59:59Z"), reading(recorded_at="2025-11-01T13:00:01Z")])
+    sql(db_path, AGE, "-15 hours")
+    s = client.get("/api/sessions/1").json
+    assert s["ended_at"] == "2025-10-31T23:00:00Z"
+    assert s["auto_closed"] is True
