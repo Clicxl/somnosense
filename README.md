@@ -28,6 +28,8 @@ npm run dev
 
 Open http://localhost:5173 (it proxies `/api` to the backend). Build with `npm run build`.
 
+**Contract tests.** Install the backend dependencies first. `npm test` in `frontend/` starts Flask on port 5055 with a temporary database, runs the tests, then stops it; port 5055 must be free. It uses the `PYTHON` environment variable if set, else the repo's `.venv`, else `python`.
+
 ## Simulator
 
 Arrives with SOM-12 (#12).
