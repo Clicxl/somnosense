@@ -1,7 +1,7 @@
 import math
 import os
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from flask import Flask, abort, g, request
@@ -23,6 +23,9 @@ def parse_ts(s):
         return None
     return t.astimezone(timezone.utc).strftime(FMT)
 
+
+GAP_SENSORS = ("heart_rate", "temperature", "humidity", "motion")  # sound waits for #11
+MAX_GAP = timedelta(minutes=5)
 
 SENSORS = {
     "heart_rate": (30, 220),
@@ -67,6 +70,22 @@ def auto_close(db):
              ended_at = COALESCE((SELECT MAX(recorded_at) FROM readings WHERE session_id = sessions.id), started_at)
            WHERE ended_at IS NULL AND opened_at < strftime('%Y-%m-%dT%H:%M:%SZ', 'now', '-14 hours')"""
     )
+
+
+def find_gaps(db, s):
+    if s["ended_at"] is None:
+        return None
+    gaps = []
+    for sensor in GAP_SENSORS:
+        seen = db.execute(
+            "SELECT recorded_at FROM readings WHERE session_id = ? AND sensor = ? ORDER BY recorded_at",
+            (s["id"], sensor),
+        )
+        times = [s["started_at"], *(r[0] for r in seen), s["ended_at"]]
+        for a, b in zip(times, times[1:]):
+            if datetime.strptime(b, FMT) - datetime.strptime(a, FMT) > MAX_GAP:
+                gaps.append({"sensor": sensor, "start": a, "end": b})
+    return gaps
 
 
 def running(db):
@@ -182,7 +201,9 @@ def create_app(db_path=None):
 
     @app.get("/api/sessions/<int:id>")
     def get_session(id):
-        return {**session_json(find_session(get_db(), id)), "gaps": None}
+        db = get_db()
+        s = find_session(db, id)
+        return {**session_json(s), "gaps": find_gaps(db, s)}
 
     @app.get("/api/sessions/<int:id>/readings")
     def session_readings(id):
