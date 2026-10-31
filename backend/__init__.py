@@ -65,7 +65,7 @@ def auto_close(db):
     # shortcut: lazy close on request, upgrade to a scheduler if hardware runs unattended
     db.execute(
         """UPDATE sessions SET auto_closed = 1,
-             ended_at = COALESCE((SELECT MAX(recorded_at) FROM readings WHERE session_id = sessions.id), started_at)
+             ended_at = MAX(sessions.started_at, COALESCE((SELECT MAX(recorded_at) FROM readings WHERE session_id = sessions.id), started_at))
            WHERE ended_at IS NULL AND opened_at < strftime('%Y-%m-%dT%H:%M:%SZ', 'now', '-14 hours')"""
     )
 
@@ -163,7 +163,7 @@ def create_app(db_path=None):
         if s["ended_at"] is not None:
             abort(409, "this Sleep Session has already ended")
         b = body()
-        ended_at = parse_ts(b["ended_at"]) if "ended_at" in b else now()
+        ended_at = parse_ts(b["ended_at"]) if "ended_at" in b else max(now(), s["started_at"])
         if ended_at is None:
             abort(400, "ended_at must be an ISO 8601 timestamp with a timezone")
         if ended_at < s["started_at"]:

@@ -101,3 +101,13 @@ def test_start_within_5_min_tolerance_returns_201(client):
     from datetime import datetime, timedelta, timezone
 
     assert start(client, started_at=(datetime.now(timezone.utc) + timedelta(minutes=4)).isoformat()).status_code == 201
+
+
+def test_bodyless_stop_during_start_tolerance_ends_at_started_at(client):
+    from datetime import datetime, timedelta, timezone
+
+    started = (datetime.now(timezone.utc) + timedelta(minutes=3)).replace(microsecond=0)
+    start(client, started_at=started.isoformat())
+    r = client.post("/api/sessions/1/stop")
+    assert r.status_code == 200
+    assert r.json["ended_at"] == started.strftime("%Y-%m-%dT%H:%M:%SZ")

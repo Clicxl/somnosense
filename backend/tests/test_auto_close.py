@@ -53,3 +53,11 @@ def test_auto_closed_session_never_ends_before_started_at(client, db_path):
     s = client.get("/api/sessions/1").json
     assert s["ended_at"] == "2025-10-31T23:00:00Z"
     assert s["auto_closed"] is True
+
+
+def test_stored_reading_before_started_at_does_not_end_session_early(client, db_path):
+    # a Reading stored before ingest checked bounds
+    client.post("/api/sessions", json={"started_at": "2025-10-31T23:00:00Z"})
+    sql(db_path, "INSERT INTO readings (session_id, sensor, value, recorded_at, simulated) VALUES (1, 'heart_rate', 60, '2025-10-31T19:00:00Z', 1)")
+    sql(db_path, AGE, "-15 hours")
+    assert client.get("/api/sessions/1").json["ended_at"] == "2025-10-31T23:00:00Z"
