@@ -36,3 +36,27 @@ def test_one_reading_per_sensor_every_30s():
     assert len(steps) == 960
     assert all(sorted(r["sensor"] for r in s) == ["heart_rate", "humidity", "motion", "temperature"] for s in steps)
     assert steps[1][0]["recorded_at"] == "2026-10-31T23:00:30Z"
+
+
+def fake_call(monkeypatch, stopped_path):
+    calls = []
+
+    def call(api, method, path, body=None):
+        calls.append(path)
+        return (409, {}) if path == stopped_path else (201, {})
+
+    monkeypatch.setattr(simulator, "call", call)
+    return calls
+
+
+@pytest.mark.parametrize("stopped_path, expected", [
+    ("/api/readings", ["/api/readings"]),
+    ("/api/sessions/1/stop", ["/api/readings", "/api/sessions/1/stop"]),
+])
+def test_stopped_during_last_batch_or_stop_exits_cleanly(monkeypatch, capsys, stopped_path, expected):
+    calls = fake_call(monkeypatch, stopped_path)
+    with pytest.raises(SystemExit) as e:
+        simulator.play("http://x", "good", 1, START, 0.25, 0, random.Random(1))
+    assert e.value.code == 0
+    assert "Sleep Session was stopped; exiting" in capsys.readouterr().out
+    assert calls == expected

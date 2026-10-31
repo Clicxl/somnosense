@@ -52,23 +52,28 @@ def call(api, method, path, body=None):
         return e.code, json.load(e)
 
 
+def post(api, path, body):
+    status, data = call(api, "POST", path, body)
+    if status == 409:
+        print("Sleep Session was stopped; exiting")
+        sys.exit(0)
+    return data
+
+
 def play(api, scenario, session_id, start, hours, speed, rng):
     batch = []
     t0 = time.monotonic()
     for i, step in enumerate(night(scenario, start, hours, rng), 1):
         batch += step
         if speed > 0 or i % 120 == 0:
-            status, _ = call(api, "POST", "/api/readings", batch)
-            if status == 409:
-                print("Sleep Session was stopped; exiting")
-                sys.exit(0)
+            post(api, "/api/readings", batch)
             batch = []
             if speed > 0:
                 time.sleep(max(0, t0 + i * 30 / speed - time.monotonic()))
     if batch:
-        call(api, "POST", "/api/readings", batch)
+        post(api, "/api/readings", batch)
     end = (start + round(hours * 120) * STEP).astimezone(timezone.utc).strftime(FMT)
-    call(api, "POST", f"/api/sessions/{session_id}/stop", {"ended_at": end})
+    post(api, f"/api/sessions/{session_id}/stop", {"ended_at": end})
 
 
 def main():
