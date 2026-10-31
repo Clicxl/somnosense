@@ -1,4 +1,3 @@
-import math
 import os
 import sqlite3
 from datetime import datetime, timedelta, timezone
@@ -17,11 +16,11 @@ def now():
 def parse_ts(s):
     try:
         t = datetime.fromisoformat(s)
-    except (TypeError, ValueError):
+        if t.tzinfo is None:
+            return None
+        return t.astimezone(timezone.utc).strftime(FMT)
+    except (TypeError, ValueError, OverflowError):
         return None
-    if t.tzinfo is None:
-        return None
-    return t.astimezone(timezone.utc).strftime(FMT)
 
 
 GAP_SENSORS = ("heart_rate", "temperature", "humidity", "motion")  # sound waits for #11
@@ -31,14 +30,14 @@ SENSORS = {
     "heart_rate": (30, 220),
     "temperature": (-10, 50),
     "humidity": (0, 100),
-    "motion": (0, math.inf),
+    "motion": (0, 2**63 - 1),  # SQLite INTEGER max; larger ints overflow on insert
     "sound": (0, 140),
 }
 
 
 def check_reading(r):
     """Reason the Reading is rejected, or None."""
-    if not isinstance(r, dict) or r.get("sensor") not in SENSORS:
+    if not isinstance(r, dict) or not isinstance(r.get("sensor"), str) or r["sensor"] not in SENSORS:
         return "unknown sensor"
     v = r.get("value")
     if isinstance(v, bool) or not isinstance(v, (int, float)):
@@ -46,7 +45,6 @@ def check_reading(r):
     if parse_ts(r.get("recorded_at")) is None:
         return "bad timestamp"
     lo, hi = SENSORS[r["sensor"]]
-    # float(v), not int(v): JSON accepts Infinity
     if not lo <= v <= hi or (r["sensor"] == "motion" and not float(v).is_integer()):
         return "out of range"
     if not isinstance(r.get("simulated"), bool):
@@ -81,7 +79,11 @@ def find_gaps(db, s):
             "SELECT recorded_at FROM readings WHERE session_id = ? AND sensor = ? ORDER BY recorded_at",
             (s["id"], sensor),
         )
-        times = [s["started_at"], *(r[0] for r in seen), s["ended_at"]]
+        times = [r[0] for r in seen]
+        if not times:  # #10: no Readings at all is one gap, even in a short session
+            gaps.append({"sensor": sensor, "start": s["started_at"], "end": s["ended_at"]})
+            continue
+        times = [s["started_at"], *times, s["ended_at"]]
         for a, b in zip(times, times[1:]):
             if datetime.strptime(b, FMT) - datetime.strptime(a, FMT) > MAX_GAP:
                 gaps.append({"sensor": sensor, "start": a, "end": b})

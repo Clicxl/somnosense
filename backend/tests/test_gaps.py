@@ -38,3 +38,9 @@ def test_gaps_at_start_and_end(client):
 def test_gaps_null_while_running(client):
     client.post("/api/sessions", json={"started_at": "2026-10-31T23:00:00Z"})
     assert client.get("/api/sessions/1").json["gaps"] is None
+
+
+def test_sensor_without_readings_is_gap_in_short_session(client):
+    gaps = session(client, "2026-10-31T23:00:00Z", "2026-10-31T23:02:00Z", ended_at="2026-10-31T23:04:00Z")
+    assert gaps_for(gaps, "motion") == [{"sensor": "motion", "start": "2026-10-31T23:00:00Z", "end": "2026-10-31T23:04:00Z"}]
+    assert gaps_for(gaps, "heart_rate") == []

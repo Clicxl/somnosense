@@ -66,3 +66,24 @@ def test_simulated_required_and_stored_as_given(client, running, db_path):
 
 def test_non_list_body_returns_400(client, running):
     assert post(client, reading()).status_code == 400
+
+
+def test_malformed_readings_rejected_without_failing_batch(client, running, db_path):
+    r = post(client, [
+        reading(),
+        reading(sensor=["heart_rate"]),
+        reading(sensor={"a": 1}),
+        reading(sensor="motion", value=2**63),
+        reading(value=10**400),
+        reading(recorded_at="0001-01-01T00:00:00+01:00"),
+        reading(sensor="motion", value=3),
+    ])
+    assert r.status_code == 201
+    assert r.json == {"accepted": 2, "rejected": [
+        {"index": 1, "reason": "unknown sensor"},
+        {"index": 2, "reason": "unknown sensor"},
+        {"index": 3, "reason": "out of range"},
+        {"index": 4, "reason": "out of range"},
+        {"index": 5, "reason": "bad timestamp"},
+    ]}
+    assert sql(db_path, "SELECT COUNT(*) FROM readings") == [(2,)]
