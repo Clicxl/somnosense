@@ -7,13 +7,14 @@ Somnosense is a web app that shows Readings from bedside and wearable Sensors fo
 ## Prerequisites
 
 - Python 3
-- Node.js and npm
+- Node.js 22+ and npm
 
 ## Backend
 
 ```
 python -m venv .venv
-.venv\Scripts\activate        # Windows
+.venv\Scripts\activate        # Windows cmd
+source .venv/Scripts/activate # Windows Git Bash
 source .venv/bin/activate     # macOS / Linux
 pip install -r backend/requirements.txt
 flask --app backend run
