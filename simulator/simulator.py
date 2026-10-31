@@ -46,17 +46,24 @@ def call(api, method, path, body=None):
         method=method,
     )
     try:
-        with urllib.request.urlopen(req) as r:
-            return r.status, json.load(r)
-    except urllib.error.HTTPError as e:
-        return e.code, json.load(e)
+        try:
+            with urllib.request.urlopen(req) as r:
+                return r.status, json.load(r)
+        except urllib.error.HTTPError as e:
+            return e.code, json.load(e)
+    except ValueError:
+        sys.exit(f"Simulator: {method} {path} did not return JSON")
+    except OSError as e:
+        sys.exit(f"Simulator: cannot reach the API at {api} ({getattr(e, 'reason', e)})")
 
 
 def post(api, path, body):
     status, data = call(api, "POST", path, body)
-    if status == 409:
+    if status == 409 and path != "/api/sessions":
         print("Sleep Session was stopped; exiting")
         sys.exit(0)
+    if status >= 300:
+        sys.exit(f"Simulator: POST {path} failed ({status}: {data})")
     return data
 
 
@@ -92,12 +99,14 @@ def main():
     unknown = [s for s in scenarios if s not in SCENARIOS]
     if unknown:
         p.error(f"unknown scenario: {', '.join(unknown)}")
+    if a.start is None and (a.nights != 1 or len(scenarios) > 1):
+        p.error("--nights and more than one --scenario need --start")
     rng = random.Random(a.seed)
 
     status, current = call(a.api, "GET", "/api/sessions/current")
     if a.start is None:
         if status != 200:
-            _, current = call(a.api, "POST", "/api/sessions", {})
+            current = post(a.api, "/api/sessions", {})
         start = datetime.strptime(current["started_at"], FMT).replace(tzinfo=timezone.utc)
         play(a.api, scenarios[0], current["id"], start, a.hours, a.speed, rng)
         return
@@ -107,7 +116,7 @@ def main():
     for k in range(a.nights):
         d = a.start + timedelta(days=k)
         start = datetime.combine(d, dtime(23)).astimezone() + timedelta(minutes=rng.randint(-30, 30))
-        _, s = call(a.api, "POST", "/api/sessions", {"started_at": start.astimezone(timezone.utc).strftime(FMT)})
+        s = post(a.api, "/api/sessions", {"started_at": start.astimezone(timezone.utc).strftime(FMT)})
         play(a.api, scenarios[k % len(scenarios)], s["id"], start, a.hours, 0, rng)
 
 

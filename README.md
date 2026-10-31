@@ -40,7 +40,7 @@ The Simulator stands in for the sensor hardware: it plays a Scenario (`good`, `r
 uv run python simulator/simulator.py --scenario good --speed 60
 ```
 
-It fills the running Sleep Session if you pressed "Going to bed", otherwise it starts one. `--speed` is how much faster than real time to play (default 1; 0 is as fast as possible). It stops the session when the night ends, and exits 0 if you stop it early.
+It fills the running Sleep Session if you pressed "Going to bed", otherwise it starts one. `--speed` is how much faster than real time to play (default 1; 0 is as fast as possible). It stops the session when the night ends, and exits 0 if you stop it early. Live mode takes a single Scenario and no `--nights` (those need `--start`). Starting a session that overlaps a stopped Sleep Session is accepted, since a live run stops at a simulated end that may be in the future.
 
 **Backfill mode.** To fill the history with past nights, give a start date and a number of nights:
 
