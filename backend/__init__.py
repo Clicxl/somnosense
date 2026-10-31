@@ -1,3 +1,4 @@
+import math
 import os
 import sqlite3
 from datetime import datetime, timezone
@@ -21,6 +22,32 @@ def parse_ts(s):
     if t.tzinfo is None:
         return None
     return t.astimezone(timezone.utc).strftime(FMT)
+
+
+SENSORS = {
+    "heart_rate": (30, 220),
+    "temperature": (-10, 50),
+    "humidity": (0, 100),
+    "motion": (0, math.inf),
+    "sound": (0, 140),
+}
+
+
+def check_reading(r):
+    """Reason the Reading is rejected, or None."""
+    if not isinstance(r, dict) or r.get("sensor") not in SENSORS:
+        return "unknown sensor"
+    v = r.get("value")
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return "non-numeric value"
+    if parse_ts(r.get("recorded_at")) is None:
+        return "bad timestamp"
+    lo, hi = SENSORS[r["sensor"]]
+    # float(v), not int(v): JSON accepts Infinity
+    if not lo <= v <= hi or (r["sensor"] == "motion" and not float(v).is_integer()):
+        return "out of range"
+    if not isinstance(r.get("simulated"), bool):
+        return "missing simulated flag"
 
 
 def session_json(row):
@@ -109,6 +136,27 @@ def create_app(db_path=None):
             abort(400, "ended_at is before started_at")
         db.execute("UPDATE sessions SET ended_at = ? WHERE id = ?", (ended_at, id))
         return session_json(find_session(db, id))
+
+    @app.post("/api/readings")
+    def add_readings():
+        batch = request.get_json(silent=True)
+        if not isinstance(batch, list):
+            abort(400, "body must be a list of Readings")
+        db = get_db()
+        s = running(db)
+        if s is None:
+            abort(409, "no Sleep Session is running")
+        rows, rejected = [], []
+        for i, r in enumerate(batch):
+            reason = check_reading(r)
+            if reason:
+                rejected.append({"index": i, "reason": reason})
+            else:
+                rows.append((s["id"], r["sensor"], r["value"], parse_ts(r["recorded_at"]), r["simulated"]))
+        db.executemany(
+            "INSERT INTO readings (session_id, sensor, value, recorded_at, simulated) VALUES (?, ?, ?, ?, ?)", rows
+        )
+        return {"accepted": len(rows), "rejected": rejected}, 201
 
     @app.get("/api/sessions/current")
     def current_session():
