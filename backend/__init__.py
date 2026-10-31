@@ -158,11 +158,34 @@ def create_app(db_path=None):
         )
         return {"accepted": len(rows), "rejected": rejected}, 201
 
+    @app.get("/api/sessions")
+    def list_sessions():
+        rows = get_db().execute("SELECT * FROM sessions ORDER BY started_at DESC, id DESC")
+        return [session_json(r) for r in rows]
+
     @app.get("/api/sessions/current")
     def current_session():
         s = running(get_db())
         if s is None:
             abort(404, "no Sleep Session is running")
         return session_json(s)
+
+    @app.get("/api/sessions/<int:id>")
+    def get_session(id):
+        return {**session_json(find_session(get_db(), id)), "gaps": None}
+
+    @app.get("/api/sessions/<int:id>/readings")
+    def session_readings(id):
+        db = get_db()
+        find_session(db, id)
+        query, args = "SELECT * FROM readings WHERE session_id = ?", [id]
+        if "sensor" in request.args:
+            query += " AND sensor = ?"
+            args.append(request.args["sensor"])
+        rows = db.execute(query + " ORDER BY recorded_at", args)
+        return [
+            {"sensor": r["sensor"], "value": r["value"], "recorded_at": r["recorded_at"], "simulated": bool(r["simulated"])}
+            for r in rows
+        ]
 
     return app
