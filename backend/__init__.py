@@ -60,6 +60,15 @@ def session_json(row):
     }
 
 
+def auto_close(db):
+    # shortcut: lazy close on request, upgrade to a scheduler if hardware runs unattended
+    db.execute(
+        """UPDATE sessions SET auto_closed = 1,
+             ended_at = COALESCE((SELECT MAX(recorded_at) FROM readings WHERE session_id = sessions.id), started_at)
+           WHERE ended_at IS NULL AND opened_at < strftime('%Y-%m-%dT%H:%M:%SZ', 'now', '-14 hours')"""
+    )
+
+
 def running(db):
     return db.execute("SELECT * FROM sessions WHERE ended_at IS NULL").fetchone()
 
@@ -92,6 +101,7 @@ def create_app(db_path=None):
         if "db" not in g:
             g.db = sqlite3.connect(app.config["DATABASE"])
             g.db.row_factory = sqlite3.Row
+            auto_close(g.db)
         return g.db
 
     @app.teardown_appcontext
