@@ -26,5 +26,5 @@ def sql(db_path, query, *args):
         return db.execute(query, args).fetchall()
 
 
-def reading(sensor="heart_rate", value=60, recorded_at="2026-10-31T23:00:30Z", simulated=True):
+def reading(sensor="heart_rate", value=60, recorded_at="2025-10-31T23:00:30Z", simulated=True):
     return {"sensor": sensor, "value": value, "recorded_at": recorded_at, "simulated": simulated}

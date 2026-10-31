@@ -5,7 +5,7 @@ from conftest import reading, sql
 
 @pytest.fixture
 def running(client):
-    client.post("/api/sessions", json={"started_at": "2026-10-31T23:00:00Z"})
+    client.post("/api/sessions", json={"started_at": "2025-10-31T23:00:00Z"})
 
 
 def post(client, readings):
@@ -18,7 +18,7 @@ def test_mixed_batch_stores_valid_and_reports_rejected(client, running, db_path)
         reading(sensor="pulse"),
         reading(value="60"),
         reading(value=True),
-        reading(recorded_at="2026-10-31T23:00:30"),
+        reading(recorded_at="2025-10-31T23:00:30"),
         reading(value=300),
     ])
     assert r.status_code == 201
@@ -51,8 +51,8 @@ def test_range_boundaries(client, running, sensor, value, accepted):
 
 
 def test_recorded_at_stored_as_utc(client, running, db_path):
-    post(client, [reading(recorded_at="2026-11-01T05:00:30.5+05:30")])
-    assert sql(db_path, "SELECT recorded_at FROM readings") == [("2026-10-31T23:30:30Z",)]
+    post(client, [reading(recorded_at="2025-11-01T05:00:30.5+05:30")])
+    assert sql(db_path, "SELECT recorded_at FROM readings") == [("2025-10-31T23:30:30Z",)]
 
 
 def test_simulated_required_and_stored_as_given(client, running, db_path):

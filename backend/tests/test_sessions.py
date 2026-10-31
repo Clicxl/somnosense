@@ -17,12 +17,12 @@ def test_start_returns_201_with_started_at_now(client):
 
 
 def test_start_converts_started_at_to_utc(client):
-    r = start(client, started_at="2026-10-31T23:00:00.123+05:30")
-    assert r.json["started_at"] == "2026-10-31T17:30:00Z"
+    r = start(client, started_at="2025-10-31T23:00:00.123+05:30")
+    assert r.json["started_at"] == "2025-10-31T17:30:00Z"
 
 
 def test_start_with_naive_started_at_returns_400(client):
-    assert start(client, started_at="2026-10-31T23:00:00").status_code == 400
+    assert start(client, started_at="2025-10-31T23:00:00").status_code == 400
 
 
 def test_double_start_returns_409(client, db_path):
@@ -32,12 +32,12 @@ def test_double_start_returns_409(client, db_path):
 
 
 def test_stop_sets_ended_at(client):
-    start(client, started_at="2026-10-31T23:00:00Z")
-    r = client.post("/api/sessions/1/stop", json={"ended_at": "2026-11-01T07:00:00Z"})
+    start(client, started_at="2025-10-31T23:00:00Z")
+    r = client.post("/api/sessions/1/stop", json={"ended_at": "2025-11-01T07:00:00Z"})
     assert r.status_code == 200
     assert r.json["id"] == 1
-    assert r.json["started_at"] == "2026-10-31T23:00:00Z"
-    assert r.json["ended_at"] == "2026-11-01T07:00:00Z"
+    assert r.json["started_at"] == "2025-10-31T23:00:00Z"
+    assert r.json["ended_at"] == "2025-11-01T07:00:00Z"
 
 
 def test_stop_defaults_ended_at_to_now(client):
@@ -48,8 +48,8 @@ def test_stop_defaults_ended_at_to_now(client):
 
 
 def test_stop_before_started_at_returns_400(client):
-    start(client, started_at="2026-10-31T23:00:00Z")
-    r = client.post("/api/sessions/1/stop", json={"ended_at": "2026-10-31T22:59:59Z"})
+    start(client, started_at="2025-10-31T23:00:00Z")
+    r = client.post("/api/sessions/1/stop", json={"ended_at": "2025-10-31T22:59:59Z"})
     assert r.status_code == 400
 
 
@@ -66,7 +66,7 @@ def test_stop_unknown_session_returns_404(client):
 
 
 def test_current_returns_running_session(client):
-    start(client, started_at="2026-10-31T23:00:00Z")
+    start(client, started_at="2025-10-31T23:00:00Z")
     r = client.get("/api/sessions/current")
     assert r.status_code == 200
     assert r.json["id"] == 1

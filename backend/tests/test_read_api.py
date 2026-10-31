@@ -21,44 +21,44 @@ def test_readings_of_unknown_session_return_404(client):
 
 
 def test_list_sessions_newest_first_by_started_at(client):
-    night(client, "2026-10-30T23:00:00Z", "2026-10-31T07:00:00Z")
-    night(client, "2026-10-28T23:00:00Z", "2026-10-29T07:00:00Z")
-    night(client, "2026-10-29T23:00:00Z", "2026-10-30T07:00:00Z")
-    assert [s["started_at"][:10] for s in client.get("/api/sessions").json] == ["2026-10-30", "2026-10-29", "2026-10-28"]
+    night(client, "2025-10-30T23:00:00Z", "2025-10-31T07:00:00Z")
+    night(client, "2025-10-28T23:00:00Z", "2025-10-29T07:00:00Z")
+    night(client, "2025-10-29T23:00:00Z", "2025-10-30T07:00:00Z")
+    assert [s["started_at"][:10] for s in client.get("/api/sessions").json] == ["2025-10-30", "2025-10-29", "2025-10-28"]
 
 
 def test_list_session_fields(client):
-    night(client, "2026-10-30T23:00:00Z", "2026-10-31T07:00:00Z")
+    night(client, "2025-10-30T23:00:00Z", "2025-10-31T07:00:00Z")
     assert client.get("/api/sessions").json == [{
-        "id": 1, "started_at": "2026-10-30T23:00:00Z", "ended_at": "2026-10-31T07:00:00Z",
+        "id": 1, "started_at": "2025-10-30T23:00:00Z", "ended_at": "2025-10-31T07:00:00Z",
         "auto_closed": False, "score": None,
     }]
 
 
 def test_get_session_has_gaps_and_score(client):
-    night(client, "2026-10-31T23:00:00Z")
+    night(client, "2025-10-31T23:00:00Z")
     r = client.get("/api/sessions/1")
     assert r.status_code == 200
     assert r.json["id"] == 1
-    assert r.json["started_at"] == "2026-10-31T23:00:00Z"
+    assert r.json["started_at"] == "2025-10-31T23:00:00Z"
     assert r.json["gaps"] is None
     assert r.json["score"] is None
 
 
 def test_readings_ordered_by_recorded_at(client):
-    night(client, "2026-10-31T23:00:00Z")
+    night(client, "2025-10-31T23:00:00Z")
     client.post("/api/readings", json=[
-        reading(recorded_at="2026-10-31T23:01:00Z", value=61),
-        reading(recorded_at="2026-10-31T23:00:30Z", value=60),
+        reading(recorded_at="2025-10-31T23:01:00Z", value=61),
+        reading(recorded_at="2025-10-31T23:00:30Z", value=60),
     ])
     assert client.get("/api/sessions/1/readings").json == [
-        {"sensor": "heart_rate", "value": 60, "recorded_at": "2026-10-31T23:00:30Z", "simulated": True},
-        {"sensor": "heart_rate", "value": 61, "recorded_at": "2026-10-31T23:01:00Z", "simulated": True},
+        {"sensor": "heart_rate", "value": 60, "recorded_at": "2025-10-31T23:00:30Z", "simulated": True},
+        {"sensor": "heart_rate", "value": 61, "recorded_at": "2025-10-31T23:01:00Z", "simulated": True},
     ]
 
 
 def test_readings_filter_by_sensor(client):
-    night(client, "2026-10-31T23:00:00Z")
+    night(client, "2025-10-31T23:00:00Z")
     client.post("/api/readings", json=[reading(), reading(sensor="motion", value=2)])
     r = client.get("/api/sessions/1/readings?sensor=motion").json
     assert [x["sensor"] for x in r] == ["motion"]
