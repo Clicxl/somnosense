@@ -10,7 +10,6 @@ test('GET /api/health returns 200 JSON', async () => {
 
 test('GET /api/health has exactly the Health fields', async () => {
   const body = await (await fetch(`${BASE_URL}/api/health`)).json()
-  // exact key set: a renamed or added backend field fails here
-  expect(Object.keys(body).sort()).toEqual(['status'] satisfies (keyof Health)[])
+  // strict: a renamed, missing or extra backend field fails here
   expect(body).toStrictEqual({ status: 'ok' } satisfies Health)
 })

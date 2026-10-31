@@ -11,12 +11,14 @@ const venvPython = join(root, '.venv', process.platform === 'win32' ? 'Scripts/p
 // no stack: vitest 5 crashes symbolicating errors thrown from globalSetup and hides the message
 const fail = (msg: string) => Object.assign(new Error(msg), { stack: msg })
 
-const answers = () => fetch(`${BASE_URL}/api/health`).then(() => true, () => false)
+// timeout so a server that accepts but never replies can't hang setup past the deadline
+const answers = () =>
+  fetch(`${BASE_URL}/api/health`, { signal: AbortSignal.timeout(1000) }).then(() => true, () => false)
 
 export default async function setup() {
   if (await answers()) throw fail('port 5055 already in use; stop the other server first')
 
-  const python = process.env.PYTHON ?? (existsSync(venvPython) ? venvPython : 'python')
+  const python = process.env.PYTHON || (existsSync(venvPython) ? venvPython : 'python')
   const dir = mkdtempSync(join(tmpdir(), 'somnosense-'))
   const child = spawn(python, ['-m', 'flask', '--app', 'backend', 'run', '--port', '5055', '--no-reload'], {
     cwd: root,
