@@ -6,21 +6,17 @@ Somnosense is a web app that shows Readings from bedside and wearable Sensors fo
 
 ## Prerequisites
 
-- Python 3
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) (installs Python 3.12+ for you if needed)
 - Node.js 22+ and npm
 
 ## Backend
 
 ```
-python -m venv .venv
-.venv\Scripts\activate        # Windows cmd
-source .venv/Scripts/activate # Windows Git Bash
-source .venv/bin/activate     # macOS / Linux
-pip install -r backend/requirements.txt
-flask --app backend run
+uv sync
+uv run flask --app backend run
 ```
 
-The API serves on port 5000 and stores data in `backend/somnosense.db`; set `SOMNOSENSE_DB` to use another file. Run the tests with `pytest`.
+The API serves on port 5000 and stores data in `backend/somnosense.db`; set `SOMNOSENSE_DB` to use another file. Run the tests with `uv run pytest`.
 
 ## Frontend
 
