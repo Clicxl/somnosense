@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS sessions (
   started_at TEXT NOT NULL,
   ended_at TEXT,
   auto_closed INTEGER NOT NULL DEFAULT 0,
-  opened_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP  -- server wall clock, never client-supplied
+  opened_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))  -- server wall clock, never client-supplied
 );
 CREATE TABLE IF NOT EXISTS readings (
   id INTEGER PRIMARY KEY,
@@ -11,6 +11,6 @@ CREATE TABLE IF NOT EXISTS readings (
   sensor TEXT NOT NULL,
   value REAL NOT NULL,
   recorded_at TEXT NOT NULL,
-  simulated INTEGER NOT NULL DEFAULT 0
+  simulated INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_readings_session_sensor_time ON readings (session_id, sensor, recorded_at);
