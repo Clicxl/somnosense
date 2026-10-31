@@ -134,6 +134,31 @@ def session_score(db, s):
     return score(s, rows, find_gaps(db, s))
 
 
+def baseline(db, s):
+    past = db.execute(
+        "SELECT * FROM sessions WHERE ended_at IS NOT NULL AND auto_closed = 0 AND started_at < ? ORDER BY started_at DESC, id DESC",
+        (s["started_at"],),
+    )
+    scores = []
+    for p in past:
+        if len(scores) == 7:
+            break
+        sc = session_score(db, p)
+        if sc is not None:
+            scores.append(sc)
+    if len(scores) < 3:
+        return None, f"Baseline still building: {len(scores)} of 3 past Sleep Sessions"
+    pts = {}
+    for sc in scores:
+        for p in sc["parts"]:
+            pts.setdefault(p["name"], []).append(p["points"])
+    return {
+        "total": round(mean(sc["total"] for sc in scores), 1),
+        "parts": {n: round(mean(v), 1) for n, v in pts.items()},
+        "sessions_used": len(scores),
+    }, None
+
+
 def session_json(db, row):
     return {
         "id": row["id"],
@@ -298,7 +323,8 @@ def create_app(db_path=None):
     def get_session(id):
         db = get_db()
         s = find_session(db, id)
-        return {**session_json(db, s), "gaps": find_gaps(db, s)}
+        b, why = baseline(db, s)
+        return {**session_json(db, s), "gaps": find_gaps(db, s), "baseline": b, "baseline_reason": why}
 
     @app.get("/api/sessions/<int:id>/readings")
     def session_readings(id):
