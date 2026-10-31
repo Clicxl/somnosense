@@ -7,16 +7,6 @@ import pytest
 from backend import create_app
 
 
-@pytest.fixture
-def db_path(tmp_path):
-    return tmp_path / "test.db"
-
-
-@pytest.fixture
-def app(db_path):
-    return create_app(db_path)
-
-
 def columns(db_path, table):
     with closing(sqlite3.connect(db_path)) as db:
         return [row[1] for row in db.execute(f"PRAGMA table_info({table})")]
@@ -55,18 +45,18 @@ def test_readings_index(app, db_path):
 
 def test_opened_at_set_by_server_in_iso_utc(app, db_path):
     with closing(sqlite3.connect(db_path)) as db:
-        db.execute("INSERT INTO sessions (started_at) VALUES ('2026-10-31T23:00:00Z')")
+        db.execute("INSERT INTO sessions (started_at) VALUES ('2025-10-31T23:00:00Z')")
         (opened_at,) = db.execute("SELECT opened_at FROM sessions").fetchone()
     assert re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ", opened_at)
 
 
 def test_reading_requires_simulated_flag(app, db_path):
     with closing(sqlite3.connect(db_path)) as db:
-        db.execute("INSERT INTO sessions (started_at) VALUES ('2026-10-31T23:00:00Z')")
+        db.execute("INSERT INTO sessions (started_at) VALUES ('2025-10-31T23:00:00Z')")
         with pytest.raises(sqlite3.IntegrityError):
             db.execute(
                 "INSERT INTO readings (session_id, sensor, value, recorded_at) "
-                "VALUES (1, 'heart_rate', 60, '2026-10-31T23:00:30Z')"
+                "VALUES (1, 'heart_rate', 60, '2025-10-31T23:00:30Z')"
             )
 
 

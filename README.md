@@ -32,4 +32,22 @@ Open http://localhost:5173 (it proxies `/api` to the backend). Build with `npm r
 
 ## Simulator
 
-Arrives with SOM-12 (#12).
+The Simulator stands in for the sensor hardware: it plays a Scenario (`good`, `restless` or `hot-humid`) against the API as Simulated Readings. Every Reading it sends is labelled simulated.
+
+**Live mode.** Start the backend, then:
+
+```
+uv run python simulator/simulator.py --scenario good --speed 60
+```
+
+It fills the running Sleep Session if you pressed "Going to bed", otherwise it starts one. `--speed` is how much faster than real time to play (default 1; 0 is as fast as possible). It stops the session when the night ends, and exits 0 if you stop it early. Live mode takes a single Scenario and no `--nights` (those need `--start`). Starting a session that overlaps a stopped Sleep Session is accepted, since a live run stops at a simulated end that may be in the future.
+
+**Backfill mode.** To fill the history with past nights, give a start date and a number of nights:
+
+```
+uv run python simulator/simulator.py --start 2026-10-24 --nights 7 --scenario good,good,restless --seed 1
+```
+
+The Scenarios in the list repeat night by night. It refuses to run while a Sleep Session is running.
+
+`--seed` makes a run repeatable and `--api` points at a backend other than `http://127.0.0.1:5000`.
