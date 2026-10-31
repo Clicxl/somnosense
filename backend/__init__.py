@@ -2,6 +2,7 @@ import os
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from statistics import mean
 
 from flask import Flask, abort, g, request
 from werkzeug.exceptions import HTTPException
@@ -51,13 +52,95 @@ def check_reading(r):
         return "missing simulated flag"
 
 
-def session_json(row):
+def part(name, points, mx, detail):
+    return {"name": name, "points": round(points, 1), "max": mx, "detail": detail}
+
+
+def score(s, readings, gaps):
+    t = lambda x: datetime.strptime(x, FMT)
+    length = (t(s["ended_at"]) - t(s["started_at"])).total_seconds()
+    gapped = {}
+    for g in gaps:
+        gapped[g["sensor"]] = gapped.get(g["sensor"], 0) + (t(g["end"]) - t(g["start"])).total_seconds()
+    by = {}
+    for r in readings:
+        by.setdefault(r["sensor"], []).append(r)
+    # a Sensor is unusable when its Data Gaps cover more than half the Sleep Session
+    ok = lambda sensor: length > 0 and bool(by.get(sensor)) and gapped.get(sensor, 0) <= length / 2
+    parts = {}
+
+    h, m = length / 3600, round(length / 60)
+    # NSF 7–9 h (Hirshkowitz 2015), 6 and 10 h "may be appropriate"; PSQI bands. Time in bed, not measured sleep
+    pts = 30 if 7 <= h <= 9 else 20 if 6 <= h < 7 or 9 < h <= 10 else 10 if h >= 5 else 0
+    parts["duration"] = part("duration", pts, 30, f"{m // 60} h {m % 60} min in bed; NSF recommends 7–9 h for adults")
+
+    if ok("motion"):
+        v = [r["value"] for r in by["motion"]]
+        # simplified neighbour rule in the spirit of Cole-Kripke/Sadeh, not their coefficients
+        wake = sum(1 for i, x in enumerate(v) if x > 0 and any(y > 0 for y in v[max(i - 1, 0):i] + v[i + 1:i + 2]))
+        eff = 1 - wake / len(v)
+        pts = 30 if eff >= 0.85 else 20 if eff >= 0.75 else 10 if eff >= 0.65 else 0  # Ohayon 2017 ≥85%; PSQI bands
+        parts["restlessness"] = part(
+            "restlessness", pts, 30,
+            f"Wake-like movement in {wake} of {len(v)} epochs (sleep efficiency estimate {eff * 100:.1f}%; ≥85% is good)",
+        )
+
+    if ok("heart_rate"):
+        hr = [(t(r["recorded_at"]), r["value"]) for r in by["heart_rate"]]
+        t0, hours = hr[0][0], {}
+        for a, x in hr:
+            hours.setdefault(int((a - t0).total_seconds() // 3600), []).append(x)
+        # pre-sleep proxy for daytime HR: stricter than Ben-Dov 2007
+        awake = mean(x for a, x in hr if (a - t0).total_seconds() < 1800)
+        dip = (awake - min(mean(b) for b in hours.values())) / awake
+        pts = 20 * min(max(dip / 0.10, 0), 1)  # Ben-Dov 2007 nondipping < 10%; linear scale is a design choice
+        parts["heart_rate"] = part(
+            "heart_rate", pts, 20,
+            f"Heart rate {'fell' if dip >= 0 else 'rose'} {abs(dip) * 100:.1f}% from the first 30 min to the lowest hour (≥10% is a normal dip)",
+        )
+
+    # Okamoto-Mizuno 2012: 13–23 °C with bedding; 40–60% RH bed microclimate used as a room proxy
+    share = lambda sensor, lo, hi: sum(lo <= r["value"] <= hi for r in by[sensor]) / len(by[sensor]) if ok(sensor) else None
+    tf, hf = share("temperature", 13, 23), share("humidity", 40, 60)
+    if tf is not None or hf is not None:
+        used = [f for f in (tf, hf) if f is not None]
+        pts = 10 * sum(used) if len(used) == 2 else 20 * used[0]
+        pct = lambda f: f"{round(f * 100)}%" if f is not None else None
+        detail = (
+            f"Temperature 13–23 °C in {pct(tf)} of Readings; humidity 40–60% in {pct(hf)}" if len(used) == 2
+            else f"Temperature 13–23 °C in {pct(tf)} of Readings; humidity missing" if hf is None
+            else f"Humidity 40–60% in {pct(hf)} of Readings; temperature missing"
+        )
+        parts["environment"] = part("environment", pts, 20, detail)
+
+    if not {"restlessness", "heart_rate", "environment"} & parts.keys():
+        return None  # no Sensor data means no score, never one from duration alone
+    names = ("duration", "restlessness", "heart_rate", "environment")
+    got = [parts[n] for n in names if n in parts]
+    return {
+        "total": round(sum(p["points"] for p in got) / sum(p["max"] for p in got) * 100),
+        "parts": got,
+        "excluded": [n for n in names if n not in parts],
+    }
+
+
+def session_score(db, s):
+    if s["ended_at"] is None:
+        return None
+    # shortcut: scored on read, a few queries per Sleep Session (N+1); store the score on stop if the list gets slow
+    rows = db.execute(
+        "SELECT sensor, value, recorded_at FROM readings WHERE session_id = ? ORDER BY recorded_at", (s["id"],)
+    ).fetchall()
+    return score(s, rows, find_gaps(db, s))
+
+
+def session_json(db, row):
     return {
         "id": row["id"],
         "started_at": row["started_at"],
         "ended_at": row["ended_at"],
         "auto_closed": bool(row["auto_closed"]),
-        "score": None,
+        "score": session_score(db, row),
     }
 
 
@@ -154,7 +237,7 @@ def create_app(db_path=None):
         if started_at > (datetime.now(timezone.utc) + timedelta(minutes=5)).strftime(FMT):
             abort(400, "started_at is more than 5 minutes in the future")
         cur = db.execute("INSERT INTO sessions (started_at) VALUES (?)", (started_at,))
-        return session_json(find_session(db, cur.lastrowid)), 201
+        return session_json(db, find_session(db, cur.lastrowid)), 201
 
     @app.post("/api/sessions/<int:id>/stop")
     def stop_session(id):
@@ -169,7 +252,7 @@ def create_app(db_path=None):
         if ended_at < s["started_at"]:
             abort(400, "ended_at is before started_at")
         db.execute("UPDATE sessions SET ended_at = ? WHERE id = ?", (ended_at, id))
-        return session_json(find_session(db, id))
+        return session_json(db, find_session(db, id))
 
     @app.post("/api/readings")
     def add_readings():
@@ -199,21 +282,23 @@ def create_app(db_path=None):
 
     @app.get("/api/sessions")
     def list_sessions():
-        rows = get_db().execute("SELECT * FROM sessions ORDER BY started_at DESC, id DESC")
-        return [session_json(r) for r in rows]
+        db = get_db()
+        rows = db.execute("SELECT * FROM sessions ORDER BY started_at DESC, id DESC").fetchall()
+        return [session_json(db, r) for r in rows]
 
     @app.get("/api/sessions/current")
     def current_session():
-        s = running(get_db())
+        db = get_db()
+        s = running(db)
         if s is None:
             abort(404, "no Sleep Session is running")
-        return session_json(s)
+        return session_json(db, s)
 
     @app.get("/api/sessions/<int:id>")
     def get_session(id):
         db = get_db()
         s = find_session(db, id)
-        return {**session_json(s), "gaps": find_gaps(db, s)}
+        return {**session_json(db, s), "gaps": find_gaps(db, s)}
 
     @app.get("/api/sessions/<int:id>/readings")
     def session_readings(id):
