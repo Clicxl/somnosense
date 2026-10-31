@@ -1,8 +1,52 @@
 import os
 import sqlite3
+from datetime import datetime, timezone
 from pathlib import Path
 
-from flask import Flask
+from flask import Flask, abort, g, request
+from werkzeug.exceptions import HTTPException
+
+FMT = "%Y-%m-%dT%H:%M:%SZ"
+
+
+def now():
+    return datetime.now(timezone.utc).strftime(FMT)
+
+
+def parse_ts(s):
+    try:
+        t = datetime.fromisoformat(s)
+    except (TypeError, ValueError):
+        return None
+    if t.tzinfo is None:
+        return None
+    return t.astimezone(timezone.utc).strftime(FMT)
+
+
+def session_json(row):
+    return {
+        "id": row["id"],
+        "started_at": row["started_at"],
+        "ended_at": row["ended_at"],
+        "auto_closed": bool(row["auto_closed"]),
+        "score": None,
+    }
+
+
+def running(db):
+    return db.execute("SELECT * FROM sessions WHERE ended_at IS NULL").fetchone()
+
+
+def find_session(db, id):
+    row = db.execute("SELECT * FROM sessions WHERE id = ?", (id,)).fetchone()
+    if row is None:
+        abort(404, "no such Sleep Session")
+    return row
+
+
+def body():
+    b = request.get_json(silent=True)
+    return b if isinstance(b, dict) else {}
 
 
 def create_app(db_path=None):
@@ -17,8 +61,60 @@ def create_app(db_path=None):
     finally:
         db.close()  # sqlite3's `with` doesn't close; Windows keeps the file locked
 
+    def get_db():
+        if "db" not in g:
+            g.db = sqlite3.connect(app.config["DATABASE"])
+            g.db.row_factory = sqlite3.Row
+        return g.db
+
+    @app.teardown_appcontext
+    def close_db(exc):
+        db = g.pop("db", None)
+        if db is not None:
+            if exc is None:
+                db.commit()
+            db.close()
+
+    @app.errorhandler(HTTPException)
+    def http_error(e):
+        return {"error": e.description}, e.code
+
     @app.get("/api/health")
     def health():
         return {"status": "ok"}
+
+    @app.post("/api/sessions")
+    def start_session():
+        db = get_db()
+        if running(db):
+            abort(409, "a Sleep Session is already running")
+        b = body()
+        started_at = parse_ts(b["started_at"]) if "started_at" in b else now()
+        if started_at is None:
+            abort(400, "started_at must be an ISO 8601 timestamp with a timezone")
+        cur = db.execute("INSERT INTO sessions (started_at) VALUES (?)", (started_at,))
+        return session_json(find_session(db, cur.lastrowid)), 201
+
+    @app.post("/api/sessions/<int:id>/stop")
+    def stop_session(id):
+        db = get_db()
+        s = find_session(db, id)
+        if s["ended_at"] is not None:
+            abort(409, "this Sleep Session has already ended")
+        b = body()
+        ended_at = parse_ts(b["ended_at"]) if "ended_at" in b else now()
+        if ended_at is None:
+            abort(400, "ended_at must be an ISO 8601 timestamp with a timezone")
+        if ended_at < s["started_at"]:
+            abort(400, "ended_at is before started_at")
+        db.execute("UPDATE sessions SET ended_at = ? WHERE id = ?", (ended_at, id))
+        return session_json(find_session(db, id))
+
+    @app.get("/api/sessions/current")
+    def current_session():
+        s = running(get_db())
+        if s is None:
+            abort(404, "no Sleep Session is running")
+        return session_json(s)
 
     return app

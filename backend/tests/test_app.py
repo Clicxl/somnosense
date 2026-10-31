@@ -7,16 +7,6 @@ import pytest
 from backend import create_app
 
 
-@pytest.fixture
-def db_path(tmp_path):
-    return tmp_path / "test.db"
-
-
-@pytest.fixture
-def app(db_path):
-    return create_app(db_path)
-
-
 def columns(db_path, table):
     with closing(sqlite3.connect(db_path)) as db:
         return [row[1] for row in db.execute(f"PRAGMA table_info({table})")]
