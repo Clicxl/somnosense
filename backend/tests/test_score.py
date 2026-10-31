@@ -54,6 +54,20 @@ def test_part_kept_when_gaps_cover_half():
     assert s["excluded"] == []
 
 
+def test_partial_last_hour_does_not_count_as_lowest_hour():
+    lone = {"sensor": "heart_rate", "value": 55, "recorded_at": SESSION["ended_at"], "simulated": True}
+    assert parts(score(SESSION, readings("restless") + [lone], []))["heart_rate"]["points"] < 10
+
+
+def test_readings_after_ended_at_left_out(client):
+    short = {"started_at": SESSION["started_at"], "ended_at": "2025-11-01T00:00:00Z"}
+    client.post("/api/sessions", json={"started_at": SESSION["started_at"]})
+    client.post("/api/readings", json=readings("restless"))
+    client.post("/api/sessions/1/stop", json={"ended_at": short["ended_at"]})
+    inside = [r for r in readings("restless") if r["recorded_at"] <= short["ended_at"]]
+    assert client.get("/api/sessions/1").json["score"] == score(short, inside, [])
+
+
 def test_environment_scored_from_humidity_alone():
     s = score(SESSION, readings("good", drop=("temperature",)), whole("temperature"))
     env = parts(s)["environment"]

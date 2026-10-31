@@ -52,6 +52,9 @@ def check_reading(r):
         return "missing simulated flag"
 
 
+PART_NAMES = ("duration", "restlessness", "heart_rate", "environment")
+
+
 def part(name, points, mx, detail):
     return {"name": name, "points": round(points, 1), "max": mx, "detail": detail}
 
@@ -60,8 +63,8 @@ def score(s, readings, gaps):
     t = lambda x: datetime.strptime(x, FMT)
     length = (t(s["ended_at"]) - t(s["started_at"])).total_seconds()
     gapped = {}
-    for g in gaps:
-        gapped[g["sensor"]] = gapped.get(g["sensor"], 0) + (t(g["end"]) - t(g["start"])).total_seconds()
+    for gap in gaps:
+        gapped[gap["sensor"]] = gapped.get(gap["sensor"], 0) + (t(gap["end"]) - t(gap["start"])).total_seconds()
     by = {}
     for r in readings:
         by.setdefault(r["sensor"], []).append(r)
@@ -89,10 +92,12 @@ def score(s, readings, gaps):
         hr = [(t(r["recorded_at"]), r["value"]) for r in by["heart_rate"]]
         t0, hours = hr[0][0], {}
         for a, x in hr:
-            hours.setdefault(int((a - t0).total_seconds() // 3600), []).append(x)
+            hours.setdefault(int((a - t0).total_seconds() // 3600), []).append((a, x))
         # pre-sleep proxy for daytime HR: stricter than Ben-Dov 2007
         awake = mean(x for a, x in hr if (a - t0).total_seconds() < 1800)
-        dip = (awake - min(mean(b) for b in hours.values())) / awake
+        # a bucket under 30 min (partial last hour) is too noisy to be the lowest hour
+        full = [b for b in hours.values() if (b[-1][0] - b[0][0]).total_seconds() >= 1800] or list(hours.values())
+        dip = (awake - min(mean(x for a, x in b) for b in full)) / awake
         pts = 20 * min(max(dip / 0.10, 0), 1)  # Ben-Dov 2007 nondipping < 10%; linear scale is a design choice
         parts["heart_rate"] = part(
             "heart_rate", pts, 20,
@@ -115,12 +120,11 @@ def score(s, readings, gaps):
 
     if not {"restlessness", "heart_rate", "environment"} & parts.keys():
         return None  # no Sensor data means no score, never one from duration alone
-    names = ("duration", "restlessness", "heart_rate", "environment")
-    got = [parts[n] for n in names if n in parts]
+    got = [parts[n] for n in PART_NAMES if n in parts]
     return {
         "total": round(sum(p["points"] for p in got) / sum(p["max"] for p in got) * 100),
         "parts": got,
-        "excluded": [n for n in names if n not in parts],
+        "excluded": [n for n in PART_NAMES if n not in parts],
     }
 
 
@@ -129,7 +133,8 @@ def session_score(db, s):
         return None
     # shortcut: scored on read, a few queries per Sleep Session (N+1); store the score on stop if the list gets slow
     rows = db.execute(
-        "SELECT sensor, value, recorded_at FROM readings WHERE session_id = ? ORDER BY recorded_at", (s["id"],)
+        "SELECT sensor, value, recorded_at FROM readings WHERE session_id = ? AND recorded_at <= ? ORDER BY recorded_at",
+        (s["id"], s["ended_at"]),
     ).fetchall()
     return score(s, rows, find_gaps(db, s))
 
@@ -154,7 +159,7 @@ def baseline(db, s):
             pts.setdefault(p["name"], []).append(p["points"])
     return {
         "total": round(mean(sc["total"] for sc in scores), 1),
-        "parts": {n: round(mean(v), 1) for n, v in pts.items()},
+        "parts": [{"name": n, "points": round(mean(pts[n]), 1)} for n in PART_NAMES if n in pts],
         "sessions_used": len(scores),
     }, None
 

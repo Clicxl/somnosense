@@ -48,7 +48,7 @@ Weights 30/30/20/20 are a design choice.
 
 **Restlessness.** Epochs are the motion Readings in time order. An epoch is wake-like when its value is above 0 and the previous or next epoch is also above 0, so an isolated movement does not count. This is a simplified neighbour rule inspired by S4 and S5; it is not their coefficients and has not been validated against PSG. Efficiency estimate = 1 - wake-like / epochs. Actigraphy under-detects wake (S5), so the estimate leans optimistic.
 
-**Heart rate.** Awake = mean heart rate over the 30 min from the first heart-rate Reading. Sleep = lowest mean of hourly buckets counted from the first heart-rate Reading. Dip = (awake - sleep) / awake. S6 defines the dip against daytime heart rate; there is no daytime heart rate here, so the pre-sleep half hour is a proxy. That is a design choice and stricter than S6, because pre-sleep heart rate is usually lower than daytime heart rate. A rise gives a negative dip and 0 points.
+**Heart rate.** Awake = mean heart rate over the 30 min from the first heart-rate Reading. Sleep = lowest mean of hourly buckets counted from the first heart-rate Reading; a bucket whose first-to-last Reading span is under 30 min (a partial final hour) is ignored, unless none qualifies. Dip = (awake - sleep) / awake. S6 defines the dip against daytime heart rate; there is no daytime heart rate here, so the pre-sleep half hour is a proxy. That is a design choice and stricter than S6, because pre-sleep heart rate is usually lower than daytime heart rate. A rise gives a negative dip and 0 points.
 
 **Environment.** Temperature share = share of temperature Readings in 13-23 degC. Humidity share = share of humidity Readings in 40-60% RH. S7 gives 40-60% for the bed microclimate, not the room; it is used for the room as a design choice.
 
@@ -70,14 +70,14 @@ Weights 30/30/20/20 are a design choice.
 }
 ```
 
-`parts` and `excluded` use the fixed order duration, restlessness, heart_rate, environment. `points` is rounded to 1 decimal. `score` is null for a running Sleep Session.
+`parts` and `excluded` use the fixed order duration, restlessness, heart_rate, environment. The Baseline's `parts` has the same order and is a list of `{"name": "duration", "points": 27.5}`. `points` is rounded to 1 decimal. `score` is null for a running Sleep Session.
 
 ## 7. Baseline
 
 The Baseline is the mean of the Sleeper's last 7 earlier Sleep Sessions that were finished, not Auto-closed Sessions, and scored (score not null). "Earlier" means started before the current one; the current session is never included. Computed for running sessions too.
 
 - Fewer than 3 such sessions: no Baseline, with reason "Baseline still building: n of 3 past Sleep Sessions".
-- Otherwise: `total` = mean of totals, `parts` = mean points per part, `sessions_used` = n, all rounded to 1 decimal. A part's mean skips sessions that excluded that part; a part no session scored is absent.
+- Otherwise: `total` = mean of totals, `parts` = mean points per part as a list of `{name, points}` in the same fixed order as the score's parts (duration, restlessness, heart_rate, environment), `sessions_used` = n, all rounded to 1 decimal. A part's mean skips sessions that excluded that part; a part no session scored is absent.
 
 ## 8. Design choices and open items
 
@@ -87,6 +87,9 @@ The Baseline is the mean of the Sleeper's last 7 earlier Sleep Sessions that wer
 - The environment 10/10 split and the use of bed-microclimate humidity for the room are choices.
 - Band points are steps, so the score jumps at band edges (for example 84.9% vs 85% efficiency).
 - The scores are not validated against PSG or any outcome.
+- The 50% Data Gap cut-off for excluding a part is not from a source.
+- The 30 min pre-sleep "awake" window, and ignoring hourly buckets shorter than 30 min, are choices.
+- The wake-like rule (count > 0 with a moving neighbour) is a choice, not validated.
 - Sound joins the formula after #11, which means re-weighting.
 
 ## 9. Expected Scenario scores
