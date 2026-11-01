@@ -78,7 +78,7 @@ Do not press "Woke up": it would end the Sleep Session at real time, and the Sim
 
 Follow the link. Walk through:
 
-- The Sleep Score and the Baseline line: the difference against it.
+- The Sleep Score gauge: the outer arc is the Sleep Score, the thin grey inner arc is the Baseline, and the difference against it is beside the gauge.
 - Each part's remark, and its Baseline under the points: duration, restlessness, heart rate, environment.
 - The total: the points of the four parts, rounded.
 - The motion Data Gap: a pale red band in the Motion chart, about the middle of the night, and a red "Data Gap" line with its start and end times under it. (Only the wireframe hatches the band.) It is only 30 min, under half the Sleep Session, so restlessness is still scored.

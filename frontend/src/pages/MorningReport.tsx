@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router'
 import { CartesianGrid, Line, LineChart, ReferenceArea, XAxis, YAxis } from 'recharts'
+import { ScoreGauge } from '@/components/ScoreGauge'
 import { Label, Stamp } from '@/components/sheet'
 import { Badge } from '@/components/ui/badge'
 import { ChartContainer } from '@/components/ui/chart'
@@ -106,7 +107,6 @@ export default function MorningReport() {
   const raw = score?.parts.reduce((a, p) => a + p.points, 0) ?? 0
   const rawMax = score?.parts.reduce((a, p) => a + p.max, 0) ?? 0
   const base = (name: string) => s.baseline?.parts.find((p) => p.name === name)?.points
-  const vsBaseline = score && s.baseline && Math.round(score.total - s.baseline.total)
 
   return (
     <>
@@ -122,21 +122,7 @@ export default function MorningReport() {
         )}
         {s.simulated && <Stamp className="absolute top-5 right-5" />}
 
-        <div className="mt-5 flex flex-wrap items-end gap-x-6 gap-y-2">
-          {score ? (
-            <p>
-              <span className="font-heading text-6xl leading-none font-semibold">{score.total}</span>
-              <span className="ml-1 text-muted-foreground">/ 100 Sleep Score</span>
-            </p>
-          ) : (
-            <p className="font-heading text-2xl font-semibold">Sleep Score not available</p>
-          )}
-          <p className="pb-1 text-sm text-muted-foreground">
-            {s.baseline
-              ? `Baseline ${s.baseline.total} from the last ${s.baseline.sessions_used} Sleep Sessions${vsBaseline === null ? '' : ` · ${vsBaseline >= 0 ? '+' : '−'}${Math.abs(vsBaseline)} against it`}`
-              : s.baseline_reason}
-          </p>
-        </div>
+        <ScoreGauge className="mt-5" score={score?.total ?? null} baseline={s.baseline} baselineReason={s.baseline_reason} />
         {!score && <p className="mt-2 text-sm">No Sensor had Readings for at least half of this Sleep Session, so it is not scored.</p>}
       </section>
 

@@ -13,9 +13,14 @@
   <rect x="904" y="102" width="100" height="26" fill="#f2f2f2" stroke="#333" stroke-width="2"/>
   <text x="954" y="120" font-size="13" font-weight="bold" text-anchor="middle" fill="#333" letter-spacing="2">SIMULATED</text>
   </g>
-  <text x="276" y="214" font-size="56" font-weight="bold" text-anchor="start" fill="#333">74</text>
-  <text x="352" y="214" font-size="14" font-weight="normal" text-anchor="start" fill="#333">/ 100 Sleep Score</text>
-  <text x="276" y="240" font-size="13" font-weight="normal" text-anchor="start" fill="#333">Baseline 71.3 from the last 7 Sleep Sessions · +3 against it</text>
+  <path d="M 284 258 A 72 72 0 0 1 428 258" fill="none" stroke="#ddd" stroke-width="10"/>
+  <path d="M 284 258 A 72 72 0 0 1 428 258" fill="none" stroke="#333" stroke-width="10" pathLength="100" stroke-dasharray="74 100"/>
+  <path d="M 298 258 A 58 58 0 0 1 414 258" fill="none" stroke="#ddd" stroke-width="4"/>
+  <path d="M 298 258 A 58 58 0 0 1 414 258" fill="none" stroke="#999" stroke-width="4" pathLength="100" stroke-dasharray="71.3 100"/>
+  <text x="356" y="244" font-size="36" font-weight="bold" text-anchor="middle" fill="#333">74</text>
+  <text x="356" y="256" font-size="10" font-weight="normal" text-anchor="middle" fill="#333">Baseline 71.3</text>
+  <text x="460" y="226" font-size="11" font-weight="normal" text-anchor="start" fill="#333" letter-spacing="1">SLEEP SCORE</text>
+  <text x="460" y="246" font-size="13" font-weight="normal" text-anchor="start" fill="#333">Baseline from the last 7 Sleep Sessions · +3 against it</text>
   <line x1="256" y1="274" x2="1024" y2="274" stroke="#999" stroke-width="1"/>
   <text x="276" y="300" font-size="11" font-weight="normal" text-anchor="start" fill="#333" letter-spacing="1">PART</text>
   <text x="406" y="300" font-size="11" font-weight="normal" text-anchor="start" fill="#333" letter-spacing="1">REMARK</text>
