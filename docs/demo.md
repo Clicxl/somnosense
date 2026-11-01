@@ -68,7 +68,7 @@ Open History.
 uv run python simulator/simulator.py --scenario restless --speed 120 --gap motion
 ```
 
-At 120 times real time the 8 h night plays in 240 s. The Live View refreshes every 5 s: the elapsed time, the latest Reading of each Sensor, a remark for each.
+At 120 times real time the 8 h night plays in 240 s. The Live View refreshes every second: the latest Reading of each Sensor and a remark for each. The elapsed time counts real time from Going to bed, so it stays at a few minutes while the Readings run hours ahead on the Simulator's clock.
 
 About 2 min in, motion goes quiet for 30 simulated minutes (about 15 s real). Once it has been silent for 5 min of the night, the Live View flags it: the Motion remark turns red with "no Reading since ...". That is how the Live View shows a Data Gap while the night is still running.
 

@@ -8,16 +8,17 @@ export function useApi<T>(path: string | null, pollMs?: number) {
 
   useEffect(() => {
     if (!path) return
-    let latest = 0
+    let busy = false
     let live = true
     const load = () => {
-      const n = ++latest
-      // an older request answering late must not overwrite a newer one
-      const keep = () => live && n === latest
-      api<T>(path).then(
-        (data) => keep() && setState({ path, data }),
-        (error: ApiError) => keep() && setState((s) => ({ path, data: s.path === path ? s.data : undefined, error })),
-      )
+      if (busy) return // a reply slower than pollMs must still land, not be overtaken by the next poll
+      busy = true
+      api<T>(path)
+        .then(
+          (data) => live && setState({ path, data }),
+          (error: ApiError) => live && setState((s) => ({ path, data: s.path === path ? s.data : undefined, error })),
+        )
+        .finally(() => (busy = false))
     }
     load()
     const timer = pollMs ? setInterval(load, pollMs) : undefined

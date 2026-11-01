@@ -345,6 +345,12 @@ def create_app(db_path=None):
         if "sensor" in request.args:
             query += " AND sensor = ?"
             args.append(request.args["sensor"])
+        if "since" in request.args:
+            since = parse_ts(request.args["since"])
+            if since is None:
+                abort(400, "since must be an ISO 8601 timestamp with a timezone")
+            query += " AND recorded_at > ?"
+            args.append(since)
         rows = db.execute(query + " ORDER BY recorded_at", args)
         return [
             {"sensor": r["sensor"], "value": int(r["value"]) if r["sensor"] == "motion" else r["value"], "recorded_at": r["recorded_at"], "simulated": bool(r["simulated"])}

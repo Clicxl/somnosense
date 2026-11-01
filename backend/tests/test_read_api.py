@@ -77,3 +77,26 @@ def test_motion_readings_returned_as_int(client):
     r = client.get("/api/sessions/1/readings?sensor=motion").json
     assert r == [{"sensor": "motion", "value": 3, "recorded_at": "2025-10-31T23:00:30Z", "simulated": True}]
     assert type(r[0]["value"]) is int  # 3.0 == 3
+
+
+def test_readings_since_returns_only_later_readings(client):
+    night(client, "2025-10-31T23:00:00Z")
+    t1, t2, t3 = "2025-10-31T23:00:30Z", "2025-10-31T23:01:00Z", "2025-10-31T23:01:30Z"
+    client.post("/api/readings", json=[
+        reading(recorded_at=t3), reading(recorded_at=t1), reading(recorded_at=t2),
+        reading(sensor="motion", value=2, recorded_at=t3),
+    ])
+    later = client.get(f"/api/sessions/1/readings?since={t1}").json
+    assert [x["recorded_at"] for x in later] == [t2, t3, t3]
+    motion = client.get(f"/api/sessions/1/readings?since={t1}&sensor=motion").json
+    assert [(x["sensor"], x["recorded_at"]) for x in motion] == [("motion", t3)]
+    offset = client.get("/api/sessions/1/readings", query_string={"since": "2025-11-01T00:00:30+01:00"}).json
+    assert offset == later
+
+
+def test_readings_invalid_since_returns_400(client):
+    night(client, "2025-10-31T23:00:00Z")
+    for bad in ("garbage", "2025-10-31T23:00:00"):
+        r = client.get("/api/sessions/1/readings", query_string={"since": bad})
+        assert r.status_code == 400
+        assert "error" in r.json

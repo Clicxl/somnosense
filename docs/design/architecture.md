@@ -55,7 +55,7 @@ The pages' types are in [`frontend/src/lib/api.ts`](../../frontend/src/lib/api.t
 | `GET /api/sessions` | | 200 `[Session]`, newest first (`started_at DESC, id DESC`) |
 | `GET /api/sessions/current` | | 200 the running Session, or 404 |
 | `GET /api/sessions/<id>` | | 200 Session plus `gaps`, `baseline`, `baseline_reason` |
-| `GET /api/sessions/<id>/readings?sensor=` | optional `sensor` filter | 200 `[Reading]`, oldest first |
+| `GET /api/sessions/<id>/readings?sensor=&since=` | optional `sensor` filter; optional `since` (ISO 8601): only Readings with `recorded_at` after it | 200 `[Reading]`, oldest first |
 | `POST /api/readings` | `[Reading]` | 201 `{accepted, rejected: [{index, reason}]}` |
 
 A Reading is `{sensor, value, recorded_at, simulated}`.
@@ -77,7 +77,7 @@ Overlapping a stopped Sleep Session is accepted: a live Simulator run stops at a
 
 **`GET /api/sessions/current`**: 404 `"no Sleep Session is running"` when none is.
 
-**`GET /api/sessions/<id>`** (404 `"no such Sleep Session"`; `/readings` has the same 404) adds:
+**`GET /api/sessions/<id>`** (404 `"no such Sleep Session"`; `/readings` has the same 404; a bad `since` is 400 `"since must be an ISO 8601 timestamp with a timezone"`) adds:
 
 - `gaps`: `[{sensor, start, end}]`, null while running.
 - `baseline`: `{total, parts: [{name, points}], sessions_used}`, or null.

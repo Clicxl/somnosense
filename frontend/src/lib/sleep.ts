@@ -28,3 +28,8 @@ export const duration = (ms: number) => {
   return `${Math.floor(m / 60)} h ${m % 60} min`
 }
 export const between = (from: string, to: string) => duration(Date.parse(to) - Date.parse(from))
+// Live View counter; never negative, since started_at may be up to 5 min ahead
+export const elapsed = (ms: number) => {
+  const s = Math.max(0, Math.floor(ms / 1000))
+  return `${Math.floor(s / 3600)} h ${Math.floor(s / 60) % 60} min ${String(s % 60).padStart(2, '0')} s`
+}
