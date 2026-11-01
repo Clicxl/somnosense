@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="698" viewBox="0 0 1280 698" font-family="sans-serif">
+  <title>Wireframe · Live View · desktop 1280 px · low fidelity</title>
+  <defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#999" stroke-width="2"/></pattern></defs>
+  <rect width="1280" height="698" fill="#fff"/>
+  <text x="16" y="24" font-size="12" font-weight="normal" text-anchor="start" fill="#333" font-style="italic">Wireframe · Live View · desktop 1280 px · low fidelity</text>
+  <text x="276" y="66" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Live View</text>
+  <text x="372" y="66" font-size="14" font-weight="normal" text-anchor="start" fill="#333">Morning Report</text>
+  <text x="508" y="66" font-size="14" font-weight="normal" text-anchor="start" fill="#333">History</text>
+  <line x1="256" y1="84" x2="1024" y2="84" stroke="#333" stroke-width="2"/>
+  <text x="276" y="122" font-size="11" font-weight="normal" text-anchor="start" fill="#333" letter-spacing="1">SLEEP SESSION SINCE 23:02</text>
+  <text x="276" y="174" font-size="48" font-weight="bold" text-anchor="start" fill="#333">3 h 15 min</text>
+  <text x="276" y="200" font-size="11" font-weight="normal" text-anchor="start" fill="#333" letter-spacing="1">LATEST READINGS 02:17</text>
+  <g transform="rotate(-6 954 115)">
+  <rect x="904" y="102" width="100" height="26" fill="#f2f2f2" stroke="#333" stroke-width="2"/>
+  <text x="954" y="120" font-size="13" font-weight="bold" text-anchor="middle" fill="#333" letter-spacing="2">SIMULATED</text>
+  </g>
+  <rect x="276" y="220" width="728" height="48" fill="#f2f2f2" stroke="#333" stroke-width="2"/>
+  <text x="640.0" y="250" font-size="16" font-weight="bold" text-anchor="middle" fill="#333">Woke up</text>
+  <text x="276" y="298" font-size="11" font-weight="normal" text-anchor="start" fill="#333" letter-spacing="1">SENSOR</text>
+  <text x="426" y="298" font-size="11" font-weight="normal" text-anchor="start" fill="#333" letter-spacing="1">REMARK</text>
+  <text x="1004" y="298" font-size="11" font-weight="normal" text-anchor="end" fill="#333" letter-spacing="1">LATEST</text>
+  <line x1="256" y1="308" x2="1024" y2="308" stroke="#333" stroke-width="1.5"/>
+  <text x="276" y="346" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Heart rate</text>
+  <text x="426" y="340" font-size="12" font-weight="normal" text-anchor="start" fill="#333">12% below first 30 min</text>
+  <polyline points="426,369 436,364 446,368 456,361 466,366 476,357 486,362 496,355 506,360 516,356 526,363 536,358 546,356" fill="none" stroke="#333" stroke-width="1.5"/>
+  <text x="974" y="352" font-size="26" font-weight="bold" text-anchor="end" fill="#333">58</text>
+  <text x="1004" y="352" font-size="11" font-weight="normal" text-anchor="end" fill="#333">bpm</text>
+  <line x1="256" y1="388" x2="1024" y2="388" stroke="#999" stroke-width="1"/>
+  <text x="276" y="426" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Temperature</text>
+  <text x="426" y="420" font-size="12" font-weight="normal" text-anchor="start" fill="#333">in range 13–23 °C</text>
+  <text x="974" y="432" font-size="26" font-weight="bold" text-anchor="end" fill="#333">20.4</text>
+  <text x="1004" y="432" font-size="11" font-weight="normal" text-anchor="end" fill="#333">°C</text>
+  <line x1="256" y1="468" x2="1024" y2="468" stroke="#999" stroke-width="1"/>
+  <text x="276" y="506" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Humidity</text>
+  <text x="426" y="500" font-size="12" font-weight="normal" text-anchor="start" fill="#333">in range 40–60%</text>
+  <text x="974" y="512" font-size="26" font-weight="bold" text-anchor="end" fill="#333">51.2</text>
+  <text x="1004" y="512" font-size="11" font-weight="normal" text-anchor="end" fill="#333">%</text>
+  <line x1="256" y1="548" x2="1024" y2="548" stroke="#999" stroke-width="1"/>
+  <text x="276" y="586" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Motion</text>
+  <text x="426" y="580" font-size="12" font-weight="bold" text-anchor="start" fill="#333" text-decoration="underline">! no Reading since 02:09</text>
+  <text x="964" y="592" font-size="26" font-weight="bold" text-anchor="end" fill="#333">0</text>
+  <text x="1004" y="592" font-size="11" font-weight="normal" text-anchor="end" fill="#333">/30 s</text>
+  <line x1="256" y1="628" x2="1024" y2="628" stroke="#999" stroke-width="1"/>
+  <text x="276" y="654" font-size="11" font-weight="normal" text-anchor="start" fill="#333">! Bold and underlined: no Reading for over 5 min, how the Live View flags a Data Gap</text>
+</svg>

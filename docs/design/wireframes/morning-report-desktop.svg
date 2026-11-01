@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1084" viewBox="0 0 1280 1084" font-family="sans-serif">
+  <title>Wireframe · Morning Report · desktop 1280 px · low fidelity</title>
+  <defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#999" stroke-width="2"/></pattern></defs>
+  <rect width="1280" height="1084" fill="#fff"/>
+  <text x="16" y="24" font-size="12" font-weight="normal" text-anchor="start" fill="#333" font-style="italic">Wireframe · Morning Report · desktop 1280 px · low fidelity</text>
+  <text x="276" y="66" font-size="14" font-weight="normal" text-anchor="start" fill="#333">Live View</text>
+  <text x="372" y="66" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Morning Report</text>
+  <text x="508" y="66" font-size="14" font-weight="normal" text-anchor="start" fill="#333">History</text>
+  <line x1="256" y1="84" x2="1024" y2="84" stroke="#333" stroke-width="2"/>
+  <text x="276" y="128" font-size="28" font-weight="bold" text-anchor="start" fill="#333">Fri 30 Oct</text>
+  <text x="276" y="152" font-size="13" font-weight="normal" text-anchor="start" fill="#333">23:02–07:02 · 8 h 0 min</text>
+  <g transform="rotate(-6 954 115)">
+  <rect x="904" y="102" width="100" height="26" fill="#f2f2f2" stroke="#333" stroke-width="2"/>
+  <text x="954" y="120" font-size="13" font-weight="bold" text-anchor="middle" fill="#333" letter-spacing="2">SIMULATED</text>
+  </g>
+  <text x="276" y="214" font-size="56" font-weight="bold" text-anchor="start" fill="#333">74</text>
+  <text x="352" y="214" font-size="14" font-weight="normal" text-anchor="start" fill="#333">/ 100 Sleep Score</text>
+  <text x="276" y="240" font-size="13" font-weight="normal" text-anchor="start" fill="#333">Baseline 71.3 from the last 7 Sleep Sessions · +3 against it</text>
+  <line x1="256" y1="274" x2="1024" y2="274" stroke="#999" stroke-width="1"/>
+  <text x="276" y="300" font-size="11" font-weight="normal" text-anchor="start" fill="#333" letter-spacing="1">PART</text>
+  <text x="406" y="300" font-size="11" font-weight="normal" text-anchor="start" fill="#333" letter-spacing="1">REMARK</text>
+  <text x="1004" y="300" font-size="11" font-weight="normal" text-anchor="end" fill="#333" letter-spacing="1">POINTS</text>
+  <line x1="256" y1="310" x2="1024" y2="310" stroke="#333" stroke-width="1.5"/>
+  <text x="276" y="338" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Duration</text>
+  <text x="406" y="334" font-size="12" font-weight="normal" text-anchor="start" fill="#333">8 h 0 min in bed; NSF recommends 7–9 h for adults</text>
+  <text x="1004" y="340" font-size="20" font-weight="bold" text-anchor="end" fill="#333">30 / 30</text>
+  <text x="1004" y="358" font-size="11" font-weight="normal" text-anchor="end" fill="#333">Baseline 29.1</text>
+  <line x1="256" y1="374" x2="1024" y2="374" stroke="#999" stroke-width="1"/>
+  <text x="276" y="402" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Restlessness</text>
+  <text x="406" y="398" font-size="12" font-weight="normal" text-anchor="start" fill="#333">Wake-like movement in 160 of 960 epochs (sleep efficiency estimate 83.3%;</text>
+  <text x="406" y="414" font-size="12" font-weight="normal" text-anchor="start" fill="#333">≥85% is good)</text>
+  <text x="1004" y="404" font-size="20" font-weight="bold" text-anchor="end" fill="#333">20 / 30</text>
+  <text x="1004" y="422" font-size="11" font-weight="normal" text-anchor="end" fill="#333">Baseline 22.5</text>
+  <line x1="256" y1="438" x2="1024" y2="438" stroke="#999" stroke-width="1"/>
+  <text x="276" y="466" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Heart rate</text>
+  <text x="406" y="462" font-size="12" font-weight="normal" text-anchor="start" fill="#333">Heart rate fell 7.0% from the first 30 min to the lowest hour (≥10% is a</text>
+  <text x="406" y="478" font-size="12" font-weight="normal" text-anchor="start" fill="#333">normal dip)</text>
+  <text x="1004" y="468" font-size="20" font-weight="bold" text-anchor="end" fill="#333">14 / 20</text>
+  <text x="1004" y="486" font-size="11" font-weight="normal" text-anchor="end" fill="#333">Baseline 12.8</text>
+  <line x1="256" y1="502" x2="1024" y2="502" stroke="#999" stroke-width="1"/>
+  <text x="276" y="530" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Environment</text>
+  <text x="406" y="526" font-size="12" font-weight="normal" text-anchor="start" fill="#333">Temperature 13–23 °C in 60% of Readings; humidity 40–60% in 40%</text>
+  <text x="1004" y="532" font-size="20" font-weight="bold" text-anchor="end" fill="#333">10 / 20</text>
+  <text x="1004" y="550" font-size="11" font-weight="normal" text-anchor="end" fill="#333">Baseline 13.6</text>
+  <line x1="256" y1="566" x2="1024" y2="566" stroke="#999" stroke-width="1"/>
+  <text x="276" y="600" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Total</text>
+  <text x="406" y="596" font-size="12" font-weight="normal" text-anchor="start" fill="#333">74 of 100, rounded</text>
+  <text x="1004" y="602" font-size="24" font-weight="bold" text-anchor="end" fill="#333">74</text>
+  <line x1="256" y1="622" x2="1024" y2="622" stroke="#333" stroke-width="2"/>
+  <text x="276" y="658" font-size="11" font-weight="normal" text-anchor="start" fill="#333" letter-spacing="1">READINGS BEHIND THE PARTS</text>
+  <line x1="256" y1="674" x2="1024" y2="674" stroke="#333" stroke-width="1.5"/>
+  <text x="276" y="700" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Heart rate · Heart rate part</text>
+  <text x="620" y="700" font-size="11" font-weight="normal" text-anchor="end" fill="#333" letter-spacing="1">BPM</text>
+  <rect x="284" y="712" width="336" height="116" fill="#f2f2f2" stroke="#999" stroke-width="1"/>
+  <polyline points="284,756 292,776 301,764 309,785 318,773 326,760 334,784 343,770 351,756 360,781 368,766 376,750 385,778 393,762 402,791 410,774 418,757 427,788 435,770 444,751 452,785 460,765 469,745 477,780 486,759 494,797 502,775 511,753 519,793 528,770 536,746 544,788 553,764 561,739 570,783 578,757 586,803 595,777 603,750 612,797 620,770" fill="none" stroke="#333" stroke-width="1.5"/>
+  <text x="284.0" y="842" font-size="11" font-weight="normal" text-anchor="start" fill="#333">23:00</text>
+  <text x="452.0" y="842" font-size="11" font-weight="normal" text-anchor="middle" fill="#333">03:00</text>
+  <text x="620.0" y="842" font-size="11" font-weight="normal" text-anchor="end" fill="#333">07:00</text>
+  <text x="660" y="700" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Temperature · Environment part</text>
+  <text x="1004" y="700" font-size="11" font-weight="normal" text-anchor="end" fill="#333" letter-spacing="1">°C</text>
+  <rect x="668" y="712" width="336" height="116" fill="#f2f2f2" stroke="#999" stroke-width="1"/>
+  <polyline points="668,770 676,758 685,779 693,767 702,754 710,777 718,763 727,788 735,774 744,759 752,785 760,770 769,754 777,782 786,766 794,748 802,779 811,761 819,793 828,775 836,755 844,790 853,770 861,749 870,786 878,765 886,743 895,781 903,759 912,799 920,776 928,752 937,794 945,770 954,745 962,789 970,763 979,737 987,784 996,756 1004,805" fill="none" stroke="#333" stroke-width="1.5"/>
+  <text x="668.0" y="842" font-size="11" font-weight="normal" text-anchor="start" fill="#333">23:00</text>
+  <text x="836.0" y="842" font-size="11" font-weight="normal" text-anchor="middle" fill="#333">03:00</text>
+  <text x="1004.0" y="842" font-size="11" font-weight="normal" text-anchor="end" fill="#333">07:00</text>
+  <text x="276" y="890" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Humidity · Environment part</text>
+  <text x="620" y="890" font-size="11" font-weight="normal" text-anchor="end" fill="#333" letter-spacing="1">%</text>
+  <rect x="284" y="902" width="336" height="116" fill="#f2f2f2" stroke="#999" stroke-width="1"/>
+  <polyline points="284,974 292,963 301,951 309,972 318,960 326,947 334,970 343,956 351,942 360,967 368,952 376,980 385,964 393,948 402,977 410,960 418,942 427,974 435,955 444,936 452,970 460,950 469,985 477,965 486,944 494,982 502,960 511,938 519,977 528,954 536,930 544,972 553,948 561,991 570,966 578,941 586,986 595,960 603,933 612,981 620,953" fill="none" stroke="#333" stroke-width="1.5"/>
+  <text x="284.0" y="1032" font-size="11" font-weight="normal" text-anchor="start" fill="#333">23:00</text>
+  <text x="452.0" y="1032" font-size="11" font-weight="normal" text-anchor="middle" fill="#333">03:00</text>
+  <text x="620.0" y="1032" font-size="11" font-weight="normal" text-anchor="end" fill="#333">07:00</text>
+  <text x="660" y="890" font-size="14" font-weight="bold" text-anchor="start" fill="#333">Motion · Restlessness part</text>
+  <text x="1004" y="890" font-size="11" font-weight="normal" text-anchor="end" fill="#333" letter-spacing="1">/30 S</text>
+  <rect x="668" y="902" width="336" height="116" fill="#f2f2f2" stroke="#999" stroke-width="1"/>
+  <rect x="836.0" y="902" width="21.0" height="116" fill="url(#hatch)" stroke="#999" stroke-width="1"/>
+  <polyline points="668,957 676,946 685,966 693,954 702,976 710,963 718,950 727,974 735,960 744,945 752,971 760,956 769,940 777,968 786,952 794,982 802,964 811,946 819,979 828,960" fill="none" stroke="#333" stroke-width="1.5"/>
+  <polyline points="861,934 870,971 878,949 886,987 895,966 903,943 912,983 920,960 928,936 937,978 945,954 954,928 962,973 970,947 979,993 987,967 996,939 1004,988" fill="none" stroke="#333" stroke-width="1.5"/>
+  <text x="668.0" y="1032" font-size="11" font-weight="normal" text-anchor="start" fill="#333">23:00</text>
+  <text x="836.0" y="1032" font-size="11" font-weight="normal" text-anchor="middle" fill="#333">03:00</text>
+  <text x="1004.0" y="1032" font-size="11" font-weight="normal" text-anchor="end" fill="#333">07:00</text>
+  <text x="660" y="1050" font-size="12" font-weight="bold" text-anchor="start" fill="#333">Data Gap 03:00–03:30</text>
+  <line x1="256" y1="864" x2="1024" y2="864" stroke="#999" stroke-width="1"/>
+  <line x1="256" y1="1054" x2="1024" y2="1054" stroke="#999" stroke-width="1"/>
+  <line x1="640" y1="674" x2="640" y2="1054" stroke="#999" stroke-width="1"/>
+</svg>
