@@ -4,7 +4,7 @@ import { Label, Stamp } from '@/components/sheet'
 import { Badge } from '@/components/ui/badge'
 import { ChartContainer } from '@/components/ui/chart'
 import type { Gap, Reading, SessionDetail } from '@/lib/api'
-import { between, clock, day, PART_LABELS, PART_NAMES, SENSORS } from '@/lib/sleep'
+import { between, clock, day, PART_LABELS, PART_NAMES, sensorsIn } from '@/lib/sleep'
 import { useApi } from '@/lib/use-api'
 
 // On the local hour, about four per chart, so labels never crowd.
@@ -183,10 +183,10 @@ export default function MorningReport() {
 
       <h2 className="px-5 pt-8 pb-2 text-[11px] tracking-[.06em] text-muted-foreground uppercase">Readings behind the parts</h2>
       <div className="grid border-t border-foreground md:grid-cols-2">
-        {SENSORS.map(({ name, label, unit, part }) => (
+        {sensorsIn(readings.data).map(({ name, label, unit, part }) => (
           <SensorChart
             key={name}
-            label={`${label} · ${PART_LABELS[part]} part`}
+            label={part ? `${label} · ${PART_LABELS[part]} part` : `${label} · not in the Sleep Score`}
             unit={unit}
             rows={readings.data!.filter((r) => r.sensor === name)}
             gaps={s.gaps?.filter((g) => g.sensor === name) ?? []}

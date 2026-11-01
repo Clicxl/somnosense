@@ -16,7 +16,7 @@ def readings(scenario, seed=1, hours=8):
     return [r for step in simulator.night(scenario, START, hours, random.Random(seed)) for r in step]
 
 
-@pytest.mark.parametrize("scenario", ["good", "restless", "hot-humid"])
+@pytest.mark.parametrize("scenario", ["good", "restless", "hot-humid", "noisy"])
 def test_values_in_range(scenario):
     lo_t, hi_t = simulator.SCENARIOS[scenario]["temp"]
     lo_h, hi_h = simulator.SCENARIOS[scenario]["hum"]
@@ -115,3 +115,12 @@ def test_failed_session_start_exits_1(monkeypatch, status):
     with pytest.raises(SystemExit) as e:
         run_main(monkeypatch)
     assert e.value.code.startswith("Simulator: POST /api/sessions")
+
+
+def test_only_noisy_has_sound():
+    assert {r["sensor"] for r in readings("good")} == {"heart_rate", "humidity", "motion", "temperature"}
+    sound = [r["value"] for r in readings("noisy") if r["sensor"] == "sound"]
+    assert len(sound) == 960
+    assert min(sound) < 40 and max(sound) > 55
+    # loudness only: a Reading is one number, never an audio sample
+    assert all(set(r) == {"sensor", "value", "recorded_at", "simulated"} for r in readings("noisy"))

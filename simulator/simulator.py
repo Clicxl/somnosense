@@ -16,6 +16,8 @@ SCENARIOS = {
     "good": {"hr": 62, "dip": 8, "temp": (19, 21), "hum": (45, 55), "move": 0.05},
     "restless": {"hr": 75, "dip": 2, "temp": (19, 21), "hum": (45, 55), "move": 0.35},
     "hot-humid": {"hr": 66, "dip": 5, "temp": (27, 30), "hum": (70, 80), "move": 0.1},
+    # sound: quiet room level (dB) and the chance per 30 s of a louder event; loudness only, never audio (#11)
+    "noisy": {"hr": 68, "dip": 4, "temp": (19, 21), "hum": (45, 55), "move": 0.15, "sound": (32, 0.15)},
 }
 
 
@@ -35,6 +37,9 @@ def night(scenario, start, hours, rng):
             "humidity": min(max(hum, sc["hum"][0]), sc["hum"][1]),
             "motion": move,
         }
+        if "sound" in sc:
+            quiet, loud = sc["sound"]
+            values["sound"] = round(rng.uniform(55, 75) if rng.random() < loud else quiet + rng.gauss(0, 2), 1)
         yield [{"sensor": k, "value": v, "recorded_at": at, "simulated": True} for k, v in values.items()]
 
 
