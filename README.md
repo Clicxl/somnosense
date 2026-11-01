@@ -34,6 +34,8 @@ Open http://localhost:5173 (it proxies `/api` to the backend). Build with `npm r
 
 **Contract tests.** Run `uv sync` first. `npm test` in `frontend/` starts Flask on port 5055 with a temporary database, runs the tests, then stops it; port 5055 must be free. It uses the `PYTHON` environment variable if set, else the repo's `.venv`, else `python`.
 
+**Unit tests.** `npx vitest run --project unit` in `frontend/` runs the component tests in `src/`; it needs no backend.
+
 ## Simulator
 
 The Simulator stands in for the sensor hardware: it plays a Scenario (`good`, `restless`, `hot-humid` or `noisy`) against the API as Simulated Readings. Every Reading it sends is labelled simulated.
