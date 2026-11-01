@@ -20,6 +20,8 @@ uv run flask --app backend run
 
 The API serves on port 5000 and stores data in `backend/somnosense.db`; set `SOMNOSENSE_DB` to use another file. Run the tests with `uv run pytest`.
 
+**"Failed to canonicalize script path" on Windows.** The `.venv` launchers point at a Python that has moved or been removed (for example after a uv Python upgrade). Delete `.venv` and run `uv sync` again, or start the backend without the launcher: `uv run python -m flask --app backend run`.
+
 ## Frontend
 
 ```
