@@ -21,6 +21,9 @@ SCENARIOS = {
 }
 
 
+GAP_SENSORS = ("heart_rate", "temperature", "humidity", "motion", "sound")
+
+
 def night(scenario, start, hours, rng):
     sc = SCENARIOS[scenario]
     steps = round(hours * 120)
@@ -72,10 +75,13 @@ def post(api, path, body):
     return data
 
 
-def play(api, scenario, session_id, start, hours, speed, rng):
+def play(api, scenario, session_id, start, hours, speed, rng, gap=None):
     batch = []
     t0 = time.monotonic()
+    mid = round(hours * 120) // 2
     for i, step in enumerate(night(scenario, start, hours, rng), 1):
+        if gap and mid <= i - 1 < mid + 60:  # 30 simulated min of silence; filtered after night() so seeds reproduce
+            step = [r for r in step if r["sensor"] != gap]
         batch += step
         if speed > 0 or i % 120 == 0:
             post(api, "/api/readings", batch)
@@ -98,6 +104,7 @@ def main():
     p.add_argument("--seed", type=int)
     p.add_argument("--start", type=date.fromisoformat, help="backfill from this date (YYYY-MM-DD)")
     p.add_argument("--nights", type=int, default=1)
+    p.add_argument("--gap", choices=GAP_SENSORS, help="drop this Sensor's Readings for 30 simulated min mid-night")
     a = p.parse_args()
 
     scenarios = a.scenario.split(",")
@@ -113,7 +120,7 @@ def main():
         if status != 200:
             current = post(a.api, "/api/sessions", {})
         start = datetime.strptime(current["started_at"], FMT).replace(tzinfo=timezone.utc)
-        play(a.api, scenarios[0], current["id"], start, a.hours, a.speed, rng)
+        play(a.api, scenarios[0], current["id"], start, a.hours, a.speed, rng, a.gap)
         return
 
     if status == 200:
@@ -122,7 +129,7 @@ def main():
         d = a.start + timedelta(days=k)
         start = datetime.combine(d, dtime(23)).astimezone() + timedelta(minutes=rng.randint(-30, 30))
         s = post(a.api, "/api/sessions", {"started_at": start.astimezone(timezone.utc).strftime(FMT)})
-        play(a.api, scenarios[k % len(scenarios)], s["id"], start, a.hours, 0, rng)
+        play(a.api, scenarios[k % len(scenarios)], s["id"], start, a.hours, 0, rng, a.gap)
 
 
 if __name__ == "__main__":

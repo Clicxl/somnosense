@@ -124,3 +124,14 @@ def test_only_noisy_has_sound():
     assert min(sound) < 40 and max(sound) > 55
     # loudness only: a Reading is one number, never an audio sample
     assert all(set(r) == {"sensor", "value", "recorded_at", "simulated"} for r in readings("noisy"))
+
+
+def test_gap_drops_one_sensor_for_30_min_from_mid_night(monkeypatch):
+    sent = []
+    monkeypatch.setattr(simulator, "call", lambda api, method, path, body=None: (sent.extend(body if path == "/api/readings" else []), (201, {}))[1])
+    simulator.play("http://x", "good", 1, START, 8, 0, random.Random(1), gap="motion")
+    motion = [r["recorded_at"] for r in sent if r["sensor"] == "motion"]
+    assert len(motion) == 960 - 60
+    assert "2026-11-01T02:59:30Z" in motion and "2026-11-01T03:30:00Z" in motion
+    assert not any("2026-11-01T03:00:00Z" <= t < "2026-11-01T03:30:00Z" for t in motion)
+    assert sum(r["sensor"] == "heart_rate" for r in sent) == 960
