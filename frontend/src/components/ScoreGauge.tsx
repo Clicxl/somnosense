@@ -15,19 +15,19 @@ export function ScoreGauge({ score, baseline, baselineReason, className }: {
   return (
     <div className={cn('flex items-end gap-5', className)}>
       <svg viewBox="0 0 200 104" role="img" aria-label={label} fill="none" className="w-40 shrink-0">
-        <path d={arc(90)} strokeWidth={12} className="stroke-muted" />
+        <path d={arc(90)} strokeWidth={12} className="stroke-border dark:stroke-muted" />
         {score !== null && <path d={arc(90)} strokeWidth={12} pathLength={100} strokeDasharray={`${score} 100`} className="stroke-chart-1" />}
         {baseline && (
           <>
-            <path d={arc(72)} strokeWidth={5} className="stroke-muted" />
+            <path d={arc(72)} strokeWidth={5} className="stroke-border dark:stroke-muted" />
             <path d={arc(72)} strokeWidth={5} pathLength={100} strokeDasharray={`${baseline.total} 100`} className="stroke-muted-foreground" />
           </>
         )}
-        <text x={100} y={84} textAnchor="middle" className="fill-foreground font-heading text-[44px] font-semibold">
+        <text x={100} y={80} textAnchor="middle" className="fill-foreground font-heading text-[44px] font-semibold">
           {score ?? '—'}
         </text>
         {baseline && (
-          <text x={100} y={100} textAnchor="middle" className="fill-muted-foreground text-[11px]">
+          <text x={100} y={100} textAnchor="middle" className="fill-muted-foreground text-[15px]">
             {`Baseline ${baseline.total}`}
           </text>
         )}

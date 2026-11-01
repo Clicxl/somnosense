@@ -34,7 +34,8 @@ describe('ScoreGauge', () => {
   it('shows an empty track and a dash with no score, keeping the Baseline (D4)', () => {
     const h = html({ score: null, baseline: b(71) })
     expect(path(h, 'stroke-chart-1')).toBeUndefined()
-    expect(path(h, 'stroke-muted')).toBeDefined()
+    // no Baseline, so the only track is the outer one
+    expect(path(html({}), 'stroke-border dark:stroke-muted')).toContain('stroke-width="12"')
     expect(h).toContain('>—</text>')
     expect(path(h, 'stroke-muted-foreground')).toContain('stroke-dasharray="71 100"')
     expect(h).toContain('>Baseline 71</text>')
