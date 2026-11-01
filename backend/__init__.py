@@ -171,6 +171,10 @@ def session_json(db, row):
         "ended_at": row["ended_at"],
         "auto_closed": bool(row["auto_closed"]),
         "score": session_score(db, row),
+        # pages label a Sleep Session's score as simulated without downloading its Readings
+        "simulated": bool(db.execute(
+            "SELECT EXISTS(SELECT 1 FROM readings WHERE session_id = ? AND simulated)", (row["id"],)
+        ).fetchone()[0]),
     }
 
 

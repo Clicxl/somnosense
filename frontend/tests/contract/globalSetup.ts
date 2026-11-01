@@ -46,5 +46,17 @@ export default async function setup() {
     }
     await new Promise((r) => setTimeout(r, 200))
   }
+
+  // 3 finished Sleep Sessions of Simulated Readings ending this morning, so a new one has a Baseline
+  const start = new Date(Date.now() - 3 * 864e5).toLocaleDateString('en-CA')
+  const sim = spawnSync(
+    python,
+    [join(root, 'simulator', 'simulator.py'), '--start', start, '--nights', '3', '--speed', '0', '--seed', '1', '--api', BASE_URL],
+    { cwd: root, encoding: 'utf8' },
+  )
+  if (sim.status !== 0) {
+    stop()
+    throw fail(`Simulator could not seed Sleep Sessions:\n${sim.stderr || sim.error}`)
+  }
   return stop
 }

@@ -31,8 +31,15 @@ def test_list_session_fields(client):
     night(client, "2025-10-30T23:00:00Z", "2025-10-31T07:00:00Z")
     assert client.get("/api/sessions").json == [{
         "id": 1, "started_at": "2025-10-30T23:00:00Z", "ended_at": "2025-10-31T07:00:00Z",
-        "auto_closed": False, "score": None,
+        "auto_closed": False, "score": None, "simulated": False,
     }]
+
+
+def test_session_is_simulated_when_any_reading_is(client):
+    night(client, "2025-10-31T23:00:00Z")
+    client.post("/api/readings", json=[reading(simulated=False), reading(simulated=True)])
+    assert client.get("/api/sessions").json[0]["simulated"] is True
+    assert client.get("/api/sessions/1").json["simulated"] is True
 
 
 def test_get_session_has_gaps_and_score(client):
