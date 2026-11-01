@@ -1,15 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { Line, LineChart, XAxis, YAxis } from 'recharts'
 import { Label, Stamp } from '@/components/sheet'
 import { Button } from '@/components/ui/button'
 import { ChartContainer } from '@/components/ui/chart'
 import { api, type Reading, type SensorName, type Session } from '@/lib/api'
-import { between, clock, sensorsIn } from '@/lib/sleep'
+import { clock, elapsed, sensorsIn } from '@/lib/sleep'
 import { useApi } from '@/lib/use-api'
 import { cn } from '@/lib/utils'
 
-const POLL_MS = 5000 // issue #18: poll, no WebSockets
+const POLL_MS = 1000 // issue #18: poll, no WebSockets
 const STALE_MS = 5 * 60_000 // same 5 min the backend uses for a Data Gap
 const TREND_MS = 30 * 60_000
 
@@ -60,9 +60,20 @@ export default function LiveView() {
   const current = useApi<Session>('/api/sessions/current', POLL_MS)
   const none = current.error?.status === 404
   const session = none ? null : current.data
-  // shortcut: re-downloads every Reading each poll (~300 KB by hour 8); add a since= parameter to the API if that gets slow
-  const readings = useApi<Reading[]>(session ? `/api/sessions/${session.id}/readings` : null, POLL_MS)
-  const rows = readings.data ?? []
+  // Readings so far for one session; each poll asks only for newer ones
+  const [log, setLog] = useState<{ id?: number; rows: Reading[] }>({ rows: [] })
+  const rows = log.id === session?.id ? log.rows : []
+  const since = rows.at(-1)?.recorded_at
+  const readings = useApi<Reading[]>(
+    session ? `/api/sessions/${session.id}/readings${since ? `?since=${encodeURIComponent(since)}` : ''}` : null,
+    POLL_MS,
+  )
+  if (session && readings.data?.length) setLog({ id: session.id, rows: [...rows, ...readings.data] })
+  const [now, setNow] = useState(Date.now)
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState<string>()
@@ -119,7 +130,7 @@ export default function LiveView() {
               Sleep Session since {clock(session.started_at)}
             </h1>
             <p className="my-2 font-heading text-5xl leading-none font-semibold">
-              {newest ? between(session.started_at, rows.at(-1)!.recorded_at) : '0 h 0 min'}
+              {elapsed(now - Date.parse(session.started_at))}
             </p>
             <Label>{newest ? `Latest Readings ${clock(newest)}` : 'Waiting for the first Readings'}</Label>
             {rows.some((r) => r.simulated) && <Stamp className="absolute top-5 right-5" />}
@@ -128,7 +139,7 @@ export default function LiveView() {
           <>
             <h1 className="font-heading text-3xl font-semibold">No Sleep Session running</h1>
             <p className="mt-2 max-w-prose text-muted-foreground">
-              Press Going to bed as you lie down. Readings from the Sensors, or the Simulator, show here every few seconds.
+              Press Going to bed as you lie down. Readings from the Sensors, or the Simulator, show here within a second.
             </p>
           </>
         ) : (
