@@ -4,6 +4,8 @@ Somnosense is a web app that shows Readings from bedside and wearable Sensors fo
 
 **All demo data is Simulated: every Reading comes from the Simulator, not real hardware.**
 
+Panel demo: [docs/demo.md](docs/demo.md). Design: [docs/design/architecture.md](docs/design/architecture.md).
+
 ## Prerequisites
 
 - [uv](https://docs.astral.sh/uv/getting-started/installation/) (installs Python 3.12+ for you if needed)
@@ -32,7 +34,7 @@ Open http://localhost:5173 (it proxies `/api` to the backend). Build with `npm r
 
 ## Simulator
 
-The Simulator stands in for the sensor hardware: it plays a Scenario (`good`, `restless` or `hot-humid`) against the API as Simulated Readings. Every Reading it sends is labelled simulated.
+The Simulator stands in for the sensor hardware: it plays a Scenario (`good`, `restless`, `hot-humid` or `noisy`) against the API as Simulated Readings. Every Reading it sends is labelled simulated.
 
 **Live mode.** Start the backend, then:
 
@@ -50,4 +52,4 @@ uv run python simulator/simulator.py --start 2026-10-24 --nights 7 --scenario go
 
 The Scenarios in the list repeat night by night. It refuses to run while a Sleep Session is running.
 
-`--seed` makes a run repeatable and `--api` points at a backend other than `http://127.0.0.1:5000`.
+`--gap SENSOR` drops that Sensor's Readings for 30 simulated minutes mid-night in every night played, to show a Data Gap. `--seed` makes a run repeatable and `--api` points at a backend other than `http://127.0.0.1:5000`.
