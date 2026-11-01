@@ -18,6 +18,8 @@ export default defineConfig({
           globalSetup: ['tests/contract/globalSetup.ts'],
         },
       },
+      // extends: inherits the @ alias and the react plugin; needs no backend
+      { extends: true, test: { name: 'unit', include: ['src/**/*.test.tsx'], environment: 'node' } },
     ],
   },
 })
