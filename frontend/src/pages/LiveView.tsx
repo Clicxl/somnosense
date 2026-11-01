@@ -63,6 +63,7 @@ export default function LiveView() {
   // Readings so far for one session; each poll asks only for newer ones
   const [log, setLog] = useState<{ id?: number; rows: Reading[] }>({ rows: [] })
   const rows = log.id === session?.id ? log.rows : []
+  // shortcut: since= is strict >, so a Reading posted later with an equal or older recorded_at is missed until reload; fine for the Simulator's in-order batches, revisit for real hardware
   const since = rows.at(-1)?.recorded_at
   const readings = useApi<Reading[]>(
     session ? `/api/sessions/${session.id}/readings${since ? `?since=${encodeURIComponent(since)}` : ''}` : null,
