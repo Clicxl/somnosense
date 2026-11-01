@@ -54,3 +54,9 @@ def test_sound_without_readings_is_no_gap(client):
 def test_sound_pause_is_a_gap(client):
     gaps = session(client, "2025-10-31T23:00:00Z", "2025-10-31T23:06:00Z", "2025-10-31T23:10:00Z", sensor="sound")
     assert gaps_for(gaps, "sound") == [{"sensor": "sound", "start": "2025-10-31T23:00:00Z", "end": "2025-10-31T23:06:00Z"}]
+
+
+def test_readings_after_end_make_no_gap(client):
+    # a Sleep Session stopped mid-replay keeps the Simulator's future-dated Readings
+    gaps = session(client, "2025-10-31T23:00:00Z", "2025-10-31T23:04:00Z", "2025-10-31T23:30:00Z", ended_at="2025-10-31T23:08:00Z")
+    assert gaps_for(gaps, "heart_rate") == []
