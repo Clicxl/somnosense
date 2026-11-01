@@ -24,7 +24,8 @@ def parse_ts(s):
         return None
 
 
-GAP_SENSORS = ("heart_rate", "temperature", "humidity", "motion")  # sound waits for #11
+GAP_SENSORS = ("heart_rate", "temperature", "humidity", "motion", "sound")
+OPTIONAL_SENSORS = ("sound",)  # #11: a stretch Sensor; no Readings means none fitted, not a Data Gap
 MAX_GAP = timedelta(minutes=5)
 
 SENSORS = {
@@ -198,7 +199,8 @@ def find_gaps(db, s):
         )
         times = [r[0] for r in seen]
         if not times:  # #10: no Readings at all is one gap, even in a short session
-            gaps.append({"sensor": sensor, "start": s["started_at"], "end": s["ended_at"]})
+            if sensor not in OPTIONAL_SENSORS:
+                gaps.append({"sensor": sensor, "start": s["started_at"], "end": s["ended_at"]})
             continue
         times = [s["started_at"], *times, s["ended_at"]]
         for a, b in zip(times, times[1:]):

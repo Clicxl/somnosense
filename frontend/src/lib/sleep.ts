@@ -1,12 +1,15 @@
 import type { PartName, SensorName } from './api'
 
-// Sound is a stretch Sensor the backend doesn't score yet, so pages leave it out.
-export const SENSORS: { name: SensorName; label: string; unit: string; part: PartName }[] = [
+// Sound is an optional stretch Sensor (#11): pages show it only when a Sleep Session has its Readings, and no part scores it.
+export const SENSORS: { name: SensorName; label: string; unit: string; part?: PartName; optional?: true }[] = [
   { name: 'heart_rate', label: 'Heart rate', unit: 'bpm', part: 'heart_rate' },
   { name: 'temperature', label: 'Temperature', unit: '°C', part: 'environment' },
   { name: 'humidity', label: 'Humidity', unit: '%', part: 'environment' },
   { name: 'motion', label: 'Motion', unit: '/30 s', part: 'restlessness' },
+  { name: 'sound', label: 'Sound', unit: 'dB', optional: true },
 ]
+
+export const sensorsIn = (rows: { sensor: SensorName }[]) => SENSORS.filter((s) => !s.optional || rows.some((r) => r.sensor === s.name))
 
 export const PART_NAMES: PartName[] = ['duration', 'restlessness', 'heart_rate', 'environment']
 export const PART_LABELS: Record<PartName, string> = {

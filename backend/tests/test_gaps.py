@@ -44,3 +44,13 @@ def test_sensor_without_readings_is_gap_in_short_session(client):
     gaps = session(client, "2025-10-31T23:00:00Z", "2025-10-31T23:02:00Z", ended_at="2025-10-31T23:04:00Z")
     assert gaps_for(gaps, "motion") == [{"sensor": "motion", "start": "2025-10-31T23:00:00Z", "end": "2025-10-31T23:04:00Z"}]
     assert gaps_for(gaps, "heart_rate") == []
+
+
+def test_sound_without_readings_is_no_gap(client):
+    gaps = session(client, "2025-10-31T23:00:00Z", "2025-10-31T23:05:00Z", "2025-10-31T23:10:00Z")
+    assert gaps_for(gaps, "sound") == []
+
+
+def test_sound_pause_is_a_gap(client):
+    gaps = session(client, "2025-10-31T23:00:00Z", "2025-10-31T23:06:00Z", "2025-10-31T23:10:00Z", sensor="sound")
+    assert gaps_for(gaps, "sound") == [{"sensor": "sound", "start": "2025-10-31T23:00:00Z", "end": "2025-10-31T23:06:00Z"}]

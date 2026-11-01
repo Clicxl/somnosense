@@ -5,7 +5,7 @@ import { Label, Stamp } from '@/components/sheet'
 import { Button } from '@/components/ui/button'
 import { ChartContainer } from '@/components/ui/chart'
 import { api, type Reading, type SensorName, type Session } from '@/lib/api'
-import { between, clock, SENSORS } from '@/lib/sleep'
+import { between, clock, sensorsIn } from '@/lib/sleep'
 import { useApi } from '@/lib/use-api'
 import { cn } from '@/lib/utils'
 
@@ -27,6 +27,10 @@ function remark(sensor: SensorName, rows: Reading[], newest: number): { text: st
       return 40 <= v && v <= 60 ? { text: 'in range 40–60%' } : { text: 'outside 40–60%', warn: true }
     case 'motion':
       return { text: v > 0 ? 'moving' : 'still' }
+    case 'sound': {
+      const peak = Math.max(...rows.filter((r) => at - Date.parse(r.recorded_at) <= TREND_MS).map((r) => r.value))
+      return { text: `peak ${peak} dB in last 30 min` }
+    }
     default: {
       const t0 = Date.parse(rows[0].recorded_at)
       const first = rows.filter((r) => Date.parse(r.recorded_at) - t0 < TREND_MS)
@@ -153,7 +157,7 @@ export default function LiveView() {
               </tr>
             </thead>
             <tbody>
-              {SENSORS.map(({ name, label, unit }) => {
+              {sensorsIn(rows).map(({ name, label, unit }) => {
                 const mine = rows.filter((r) => r.sensor === name)
                 const last = mine.at(-1)
                 const note = remark(name, mine, newest ?? 0)
