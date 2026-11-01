@@ -194,8 +194,8 @@ def find_gaps(db, s):
     gaps = []
     for sensor in GAP_SENSORS:
         seen = db.execute(
-            "SELECT recorded_at FROM readings WHERE session_id = ? AND sensor = ? ORDER BY recorded_at",
-            (s["id"], sensor),
+            "SELECT recorded_at FROM readings WHERE session_id = ? AND sensor = ? AND recorded_at <= ? ORDER BY recorded_at",
+            (s["id"], sensor, s["ended_at"]),
         )
         times = [r[0] for r in seen]
         if not times:  # #10: no Readings at all is one gap, even in a short session
