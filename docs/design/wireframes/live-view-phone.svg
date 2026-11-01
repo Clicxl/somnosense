@@ -41,6 +41,6 @@
   <text x="315" y="592" font-size="26" font-weight="bold" text-anchor="end" fill="#333">0</text>
   <text x="355" y="592" font-size="11" font-weight="normal" text-anchor="end" fill="#333">/30 s</text>
   <line x1="0" y1="628" x2="375" y2="628" stroke="#999" stroke-width="1"/>
-  <text x="20" y="654" font-size="11" font-weight="normal" text-anchor="start" fill="#333">! Bold and underlined: no Reading for over 5 min, how</text>
-  <text x="20" y="668" font-size="11" font-weight="normal" text-anchor="start" fill="#333">the Live View flags a Data Gap</text>
+  <text x="20" y="654" font-size="11" font-weight="normal" text-anchor="start" fill="#333">! No Reading for over 5 min: red on the real page, bold</text>
+  <text x="20" y="668" font-size="11" font-weight="normal" text-anchor="start" fill="#333">and underlined here (grey wireframe): a Data Gap</text>
 </svg>

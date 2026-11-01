@@ -6,7 +6,9 @@ About 12 to 13 minutes. All data is Simulated: every Reading comes from the Simu
 
 ```
 uv sync
-cd frontend && npm ci
+cd frontend
+npm ci
+cd ..
 ```
 
 ## 1. Start the app (~1 min)
@@ -79,7 +81,7 @@ Follow the link. Walk through:
 - The Sleep Score and the Baseline line: the difference against it.
 - Each part's remark, and its Baseline under the points: duration, restlessness, heart rate, environment.
 - The total: the points of the four parts, rounded.
-- The motion Data Gap: a hatched band in the Motion chart, about the middle of the night, and the "Data Gap" line under it. It is only 30 min, under half the Sleep Session, so restlessness is still scored.
+- The motion Data Gap: a pale red band in the Motion chart, about the middle of the night, and a red "Data Gap" line with its start and end times under it. (Only the wireframe hatches the band.) It is only 30 min, under half the Sleep Session, so restlessness is still scored.
 - The Simulated stamp.
 
 ## Reset
